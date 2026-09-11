@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生徒用回答画面 | リーダー研修</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 flex justify-center items-center">
+
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-indigo-900 mb-6 border-b pb-3">リーダー研修 回答フォーム</h1>
+
+    <form id="answer-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-1">班名 または お名前</label>
+        <input type="text" id="author" placeholder="例: 1班 または 山田" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-1">質問項目</label>
+        <select id="question-id" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+          <option value="q1">【最初の問い】リーダーってどんな人？</option>
+          <option value="case1">ケース1: リーダーへの不満（1班）</option>
+          <option value="case2">ケース2: 失敗した人がいる（2班）</option>
+          <option value="case3">ケース3: 嫌われても注意する？（3班）</option>
+          <option value="case4">ケース4: 正しいけど納得されない（4班）</option>
+          <option value="case5">ケース5: 意見が分かれるリアル場面（5班）</option>
+          <option value="q2">【最後の問い】あなたにとって、リーダーとは？</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-1">回答内容</label>
+        <textarea id="answer-text" rows="4" placeholder="あなたの意見を入力してください" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+      </div>
+
+      <button type="submit" id="submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-lg transition-colors shadow-md">
+        送信する
+      </button>
+    </form>
+
+    <div id="success-msg" class="hidden mt-4 p-3 bg-emerald-100 text-emerald-800 text-center rounded-lg font-bold">
+      送信が完了しました！発表画面に反映されます。
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDummyKeyForLeaderWorkshop2026",
+      authDomain: "october-leader-workshop.firebaseapp.com",
+      projectId: "october-leader-workshop",
+      storageBucket: "october-leader-workshop.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    document.getElementById('answer-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      const author = document.getElementById('author').value.trim();
+      const questionId = document.getElementById('question-id').value;
+      const text = document.getElementById('answer-text').value.trim();
+
+      if (!text || !author) return;
+
+      btn.disabled = true;
+      btn.innerText = '送信中...';
+
+      try {
+        await db.collection("answers").add({
+          author: author,
+          questionId: questionId,
+          text: text,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById('answer-text').value = '';
+        const msg = document.getElementById('success-msg');
+        msg.classList.remove('hidden');
+        setTimeout(() => msg.classList.add('hidden'), 3000);
+      } catch (err) {
+        alert('送信に失敗しました: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '送信する';
+      }
+    });
+  </script>
+</body>
+</html>

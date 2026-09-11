@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10月全校評議会 | リーダー研修</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <style>
+    body { background-color: #f8fafc; font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; }
+    .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .slide-enter { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="h-screen flex flex-col justify-between overflow-hidden select-none">
+
+  <!-- ヘッダー -->
+  <header class="bg-indigo-900 text-white px-8 py-4 flex justify-between items-center shadow-md z-10">
+    <div class="flex items-center space-x-3">
+      <span class="bg-indigo-700 text-indigo-200 text-xs px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">10月全校評議会</span>
+      <h1 class="text-xl font-bold">リーダー研修 ワークショップ</h1>
+    </div>
+    
+    <!-- タイマーコントロール & ステータス -->
+    <div class="flex items-center space-x-6">
+      <div class="bg-indigo-800/80 rounded-lg px-4 py-2 flex items-center space-x-3 border border-indigo-700">
+        <div class="text-2xl font-mono font-bold text-yellow-300" id="timer-display">05:00</div>
+        <div class="flex items-center space-x-1">
+          <button onclick="setTimer(1)" class="bg-indigo-700 hover:bg-indigo-600 text-xs px-2 py-1 rounded text-white font-medium">1分</button>
+          <button onclick="setTimer(3)" class="bg-indigo-700 hover:bg-indigo-600 text-xs px-2 py-1 rounded text-white font-medium">3分</button>
+          <button onclick="setTimer(5)" class="bg-indigo-700 hover:bg-indigo-600 text-xs px-2 py-1 rounded text-white font-medium">5分</button>
+          <button onclick="setTimer(10)" class="bg-indigo-700 hover:bg-indigo-600 text-xs px-2 py-1 rounded text-white font-medium">10分</button>
+          <input type="number" id="custom-minutes" placeholder="分" class="w-12 text-center text-xs py-1 rounded text-gray-900 border border-indigo-300 focus:outline-none" min="1" max="99">
+          <button onclick="setCustomTimer()" class="bg-amber-600 hover:bg-amber-500 text-xs px-2 py-1 rounded text-white font-medium">設定</button>
+        </div>
+        <div class="flex items-center space-x-1 border-l border-indigo-700 pl-2">
+          <button id="timer-start-btn" onclick="toggleTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-xs px-2 py-1 rounded text-white font-bold">スタート</button>
+          <button onclick="resetTimer()" class="bg-gray-600 hover:bg-gray-500 text-xs px-2 py-1 rounded text-white font-medium">リセット</button>
+        </div>
+      </div>
+
+      <div id="status-badge" class="flex items-center space-x-2 bg-emerald-500/20 text-emerald-300 text-xs px-3 py-1.5 rounded-full border border-emerald-500/30">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="status-text">Firebase: 接続中</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- メインエリア -->
+  <main class="flex-1 p-8 overflow-y-auto relative flex flex-col justify-center items-center">
+    <div id="slide-container" class="w-full max-w-6xl h-full flex flex-col justify-center slide-enter">
+      <!-- スライドコンテンツがここに代入されます -->
+    </div>
+  </main>
+
+  <!-- フッター (ナビゲーション) -->
+  <footer class="bg-white border-t border-gray-200 px-8 py-4 flex justify-between items-center z-10 shadow-lg">
+    <button id="prev-btn" onclick="prevSlide()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-lg border border-gray-300 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center space-x-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <span>前へ</span>
+    </button>
+    
+    <div class="flex items-center space-x-4">
+      <span class="text-sm font-semibold text-gray-500" id="slide-indicator">1 / 11</span>
+    </div>
+
+    <button id="next-btn" onclick="nextSlide()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center space-x-2">
+      <span>次へ</span>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDummyKeyForLeaderWorkshop2026",
+      authDomain: "october-leader-workshop.firebaseapp.com",
+      projectId: "october-leader-workshop",
+      storageBucket: "october-leader-workshop.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+
+    let db;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      document.getElementById('status-text').innerText = 'Firebase: リアルタイム同期中';
+    } catch (e) {
+      console.error(e);
+      document.getElementById('status-badge').className = "flex items-center space-x-2 bg-rose-500/20 text-rose-300 text-xs px-3 py-1.5 rounded-full border border-rose-500/30";
+      document.getElementById('status-text').innerText = 'Firebase: 接続エラー';
+    }
+
+    const slides = [
+      {
+        // ① オープニング
+        type: 'title',
+        title: '「リーダーって、何？」',
+        subtitle: '全校評議会 リーダー研修ワークショップ',
+        desc: 'あなたが思う「リーダー」のイメージから考えてみましょう。'
+      },
+      {
+        // ② 最初の意見を集める
+        type: 'question',
+        id: 'q1',
+        title: '【問い1】「リーダーってどんな人？」',
+        desc: '端末から自分の思う「良いリーダーの条件」や「イメージ」を送信してください。',
+        groupFilter: false
+      },
+      {
+        // ③ 今日やることを説明
+        type: 'info',
+        title: '本日のワークショップについて',
+        content: `
+          <div class="space-y-6 text-left max-w-3xl mx-auto">
+            <div class="bg-indigo-50 p-6 rounded-xl border border-indigo-100">
+              <h3 class="text-2xl font-bold text-indigo-900 mb-2">「リーダーならどうする？」という場面を考える</h3>
+              <p class="text-gray-700 text-lg">学校生活の中で起こりそうな5つの事例（ケース）をもとにグループで話し合います。</p>
+            </div>
+            <div class="bg-amber-50 p-6 rounded-xl border border-amber-200">
+              <h3 class="text-2xl font-bold text-amber-900 mb-2">✨ 正解は一つではありません</h3>
+              <p class="text-gray-800 text-lg">「あなたならどうするか」「なぜそうするか」を自由に意見交換しましょう。</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        // ケース問題の進め方
+        type: 'info',
+        title: 'グループのケース担当一覧',
+        content: `
+          <div class="bg-white p-6 rounded-xl border border-gray-200 text-left max-w-3xl mx-auto shadow-sm">
+            <h3 class="text-xl font-bold text-indigo-900 mb-4 border-b pb-2">各班の担当テーマ（話し合い＋発表）</h3>
+            <ul class="space-y-3 text-lg text-gray-800">
+              <li class="flex items-center"><span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded mr-3 text-sm">1班</span> ケース1：リーダーへの不満が出たとき</li>
+              <li class="flex items-center"><span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded mr-3 text-sm">2班</span> ケース2：大失敗して落ち込んでいる人がいるとき</li>
+              <li class="flex items-center"><span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded mr-3 text-sm">3班</span> ケース3：嫌われても注意すべきか迷ったとき</li>
+              <li class="flex items-center"><span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded mr-3 text-sm">4班</span> ケース4：正しい提案なのに周りが納得しないとき</li>
+              <li class="flex items-center"><span class="bg-indigo-600 text-white font-bold px-3 py-1 rounded mr-3 text-sm">5班</span> ケース5：対立する2つの意見で板挟みになったとき</li>
+            </ul>
+          </div>
+        `
+      },
+      {
+        // ④ ケース1
+        type: 'case',
+        id: 'case1',
+        targetGroup: '1班担当',
+        title: 'ケース1: リーダーへの不満が出たとき',
+        problem: '「計画が強引」「進め方が分かりにくい」など、陰でリーダーに対する不満や愚痴が聞こえてきました。あなたならどう対応しますか？「なぜそうするか」も考えてみましょう。'
+      },
+      {
+        // ④ ケース2
+        type: 'case',
+        id: 'case2',
+        targetGroup: '2班担当',
+        title: 'ケース2: 失敗した人がいるとき',
+        problem: '準備の中でメンバーが大きなミスをしてしまい、作業が遅れてしまいました。本人はとても落ち込んでいます。リーダーとしてどう声をかけ、行動しますか？'
+      },
+      {
+        // ④ ケース3
+        type: 'case',
+        id: 'case3',
+        targetGroup: '3班担当',
+        title: 'ケース3: 嫌われても注意する？',
+        problem: '仲の良い友達が作業をやらずに遊んでいます。注意すると場の雰囲気が悪くなったり嫌われたりするかもしれません。あなたなら注意しますか？どう伝えますか？'
+      },
+      {
+        // ④ ケース4
+        type: 'case',
+        id: 'case4',
+        targetGroup: '4班担当',
+        title: 'ケース4: 正しいけど納得されないとき',
+        problem: 'ルールや効率を考えると絶対に正しい提案なのですが、周りから「正論すぎてやりづらい」「面倒くさい」と反発されています。どのように説明・アプローチしますか？'
+      },
+      {
+        // ④ ケース5
+        type: 'case',
+        id: 'case5',
+        targetGroup: '5班担当',
+        title: 'ケース5: 意見が対立するリアルな場面',
+        problem: '「クオリティ重視でじっくり作りたい派」と「提出期限優先で簡略化したい派」で意見が真っ二つに分かれました。どちらの意見も一理あります。リーダーとしてどう決断・集約しますか？'
+      },
+      {
+        // ⑥ 最後の問い
+        type: 'question',
+        id: 'q2',
+        title: '【最後の問い】「あなたにとって、リーダーとは？」',
+        desc: '今日の話し合いを通して考えた、あなた自身の「リーダー像」を教えてください。',
+        groupFilter: false
+      },
+      {
+        // ⑧ まとめ
+        type: 'info',
+        title: '本日のまとめ：リーダーの姿',
+        content: `
+          <div class="space-y-6 text-left max-w-4xl mx-auto">
+            <p class="text-xl font-bold text-center text-indigo-900 mb-4">「リーダーには、たった一つの正解があるわけではない」</p>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-center">
+                <span class="text-2xl font-black text-indigo-700 block mb-1">聴く</span>
+                <span class="text-xs text-gray-600">みんなの意見を受け止める</span>
+              </div>
+              <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-center">
+                <span class="text-2xl font-black text-indigo-700 block mb-1">考える</span>
+                <span class="text-xs text-gray-600">どうするのが良いか悩む</span>
+              </div>
+              <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-center">
+                <span class="text-2xl font-black text-indigo-700 block mb-1">支える</span>
+                <span class="text-xs text-gray-600">困っている人に寄り添う</span>
+              </div>
+              <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-center">
+                <span class="text-2xl font-black text-indigo-700 block mb-1">決める</span>
+                <span class="text-xs text-gray-600">方向性を決定する</span>
+              </div>
+              <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-center">
+                <span class="text-2xl font-black text-indigo-700 block mb-1">動く</span>
+                <span class="text-xs text-gray-600">自ら手本となって行動する</span>
+              </div>
+              <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100 text-center">
+                <span class="text-2xl font-black text-indigo-700 block mb-1">責任を持つ</span>
+                <span class="text-xs text-gray-600">チーム全体を見守る</span>
+              </div>
+            </div>
+            <p class="text-center text-gray-600 text-sm mt-4">学んだことを今後の全校評議会やクラス活動に活かしていきましょう！</p>
+          </div>
+        `
+      }
+    ];
+
+    let currentSlide = 0;
+    let answersData = {};
+
+    if (db) {
+      db.collection("answers").onSnapshot((snapshot) => {
+        answersData = {};
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (!answersData[data.questionId]) answersData[data.questionId] = [];
+          answersData[data.questionId].push(data);
+        });
+        renderSlide();
+      });
+    }
+
+    function renderSlide() {
+      const slide = slides[currentSlide];
+      const container = document.getElementById('slide-container');
+      
+      document.getElementById('slide-indicator').innerText = `${currentSlide + 1} / ${slides.length}`;
+      document.getElementById('prev-btn').disabled = currentSlide === 0;
+      document.getElementById('next-btn').disabled = currentSlide === slides.length - 1;
+
+      if (slide.type === 'title') {
+        container.innerHTML = `
+          <div class="text-center py-16 px-6 bg-white rounded-2xl card-shadow w-full">
+            <h1 class="text-6xl font-black text-indigo-900 mb-6 tracking-tight">${slide.title}</h1>
+            <p class="text-2xl text-indigo-600 font-semibold mb-6">${slide.subtitle}</p>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">${slide.desc}</p>
+          </div>
+        `;
+      } else if (slide.type === 'info') {
+        container.innerHTML = `
+          <div class="bg-white rounded-2xl card-shadow p-10 w-full text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">${slide.title}</h2>
+            ${slide.content}
+          </div>
+        `;
+      } else if (slide.type === 'question' || slide.type === 'case') {
+        const answers = answersData[slide.id] || [];
+        
+        let headerContent = '';
+        if (slide.type === 'case') {
+          headerContent = `
+            <div class="flex items-center justify-between mb-2">
+              <span class="bg-amber-100 text-amber-800 font-bold text-sm px-3 py-1 rounded-full border border-amber-300">${slide.targetGroup}</span>
+              <span class="text-sm font-semibold text-gray-500">投稿数: ${answers.length}件</span>
+            </div>
+            <h2 class="text-3xl font-bold text-indigo-900 mb-2">${slide.title}</h2>
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded mb-2 text-left">
+              <p class="text-amber-900 font-medium text-lg">${slide.problem}</p>
+            </div>
+          `;
+        } else {
+          headerContent = `
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-semibold text-gray-500">投稿数: ${answers.length}件</span>
+            </div>
+            <h2 class="text-3xl font-bold text-indigo-900 mb-2">${slide.title}</h2>
+            <p class="text-gray-600 mb-2 text-left text-lg">${slide.desc}</p>
+          `;
+        }
+
+        let cardsHtml = '';
+        if (answers.length === 0) {
+          cardsHtml = `
+            <div class="col-span-full py-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+              <p class="text-lg">回答を待っています...</p>
+            </div>
+          `;
+        } else {
+          cardsHtml = answers.map(a => `
+            <div class="bg-white p-5 rounded-xl border border-gray-200 card-shadow flex flex-col justify-between hover:border-indigo-300 transition-all">
+              <p class="text-gray-800 text-lg font-medium mb-4 text-left whitespace-pre-wrap">${escapeHtml(a.text)}</p>
+              <div class="flex justify-between items-center border-t pt-3 text-xs text-gray-400">
+                <span class="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">${escapeHtml(a.author || '匿名')}</span>
+                <span>${a.timestamp ? new Date(a.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        container.innerHTML = `
+          <div class="w-full h-full flex flex-col">
+            <div class="bg-white p-6 rounded-xl card-shadow mb-4">
+              ${headerContent}
+            </div>
+            <div class="flex-1 overflow-y-auto grid grid-cols-3 gap-4 pr-2">
+              ${cardsHtml}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide();
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        renderSlide();
+      }
+    }
+
+    // タイマー
+    let timerSeconds = 300;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      document.getElementById('timer-display').innerText = 
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function setTimer(minutes) {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      document.getElementById('timer-start-btn').innerText = 'スタート';
+      document.getElementById('timer-start-btn').className = 'bg-emerald-600 hover:bg-emerald-500 text-xs px-2 py-1 rounded text-white font-bold';
+      timerSeconds = minutes * 60;
+      updateTimerDisplay();
+    }
+
+    function setCustomTimer() {
+      const input = document.getElementById('custom-minutes');
+      const val = parseInt(input.value);
+      if (val && val > 0) {
+        setTimer(val);
+        input.value = '';
+      }
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timer-start-btn');
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        btn.innerText = '再開';
+        btn.className = 'bg-emerald-600 hover:bg-emerald-500 text-xs px-2 py-1 rounded text-white font-bold';
+      } else {
+        isTimerRunning = true;
+        btn.innerText = '停止';
+        btn.className = 'bg-rose-600 hover:bg-rose-500 text-xs px-2 py-1 rounded text-white font-bold';
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            btn.innerText = '終了';
+            alert('時間が終了しました！');
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      setTimer(5);
+    }
+
+    renderSlide();
+  </script>
+</body>
+</html>
