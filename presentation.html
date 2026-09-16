@@ -1953,6 +1953,362 @@
   updateTimerDisplay();
 
 </script>
+element.className =
+        "text-xs font-bold px-3 py-2 rounded-full bg-slate-100 text-slate-500";
 
+    }
+
+  }
+
+
+  /*
+   * =====================================================
+   * QRコード生成
+   * =====================================================
+   */
+
+  function generateQRCode() {
+
+    const qrContainer = document.getElementById("qr-code");
+
+    if (qrContainer) {
+
+      qrContainer.innerHTML = "";
+
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(STUDENT_URL)}`;
+
+      const img = document.createElement("img");
+
+      img.src = qrUrl;
+
+      img.alt = "回答ページQRコード";
+
+      img.className = "w-48 h-48";
+
+      qrContainer.appendChild(img);
+
+    }
+
+  }
+
+
+  /*
+   * =====================================================
+   * タイマー処理
+   * =====================================================
+   */
+
+  let timerInterval = null;
+
+  let remainingSeconds = 420;
+
+
+  function updateTimerDisplay() {
+
+    const minutes = Math.floor(remainingSeconds / 60);
+
+    const seconds = remainingSeconds % 60;
+
+    const formatted = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+    const mainDisplay = document.getElementById("timer-display-main");
+
+    if (mainDisplay) {
+
+      mainDisplay.textContent = formatted;
+
+    }
+
+  }
+
+
+  function setTimer(minutes) {
+
+    clearInterval(timerInterval);
+
+    timerInterval = null;
+
+    remainingSeconds = minutes * 60;
+
+    updateTimerDisplay();
+
+  }
+
+
+  function toggleTimer() {
+
+    if (timerInterval) {
+
+      clearInterval(timerInterval);
+
+      timerInterval = null;
+
+    } else {
+
+      timerInterval = setInterval(() => {
+
+        if (remainingSeconds > 0) {
+
+          remainingSeconds--;
+
+          updateTimerDisplay();
+
+        } else {
+
+          clearInterval(timerInterval);
+
+          timerInterval = null;
+
+        }
+
+      }, 1000);
+
+    }
+
+  }
+
+
+  function resetTimer() {
+
+    clearInterval(timerInterval);
+
+    timerInterval = null;
+
+    remainingSeconds = 420;
+
+    updateTimerDisplay();
+
+  }
+
+
+  /*
+   * =====================================================
+   * リアルタイム回答の監視と管理
+   * =====================================================
+   */
+
+  let currentAnswers = [];
+
+
+  db.collection("answers")
+    .orderBy("createdAt", "desc")
+    .onSnapshot((snapshot) => {
+
+      currentAnswers = [];
+
+      let q1Count = 0;
+
+      let q2Count = 0;
+
+
+      snapshot.forEach((doc) => {
+
+        const data = doc.data();
+
+        const answerObj = { id: doc.id, ...data };
+
+        currentAnswers.push(answerObj);
+
+
+        if (data.questionId === "q1") q1Count++;
+
+        if (data.questionId === "q2") q2Count++;
+
+      });
+
+
+      renderLiveAnswers();
+
+      updateCounts(q1Count, q2Count);
+
+    });
+
+
+  function renderLiveAnswers() {
+
+    const grid = document.getElementById("live-answer-grid");
+
+    const countLabel = document.getElementById("live-answer-count");
+
+    if (!grid) return;
+
+
+    grid.innerHTML = "";
+
+    countLabel.textContent = `回答 ${currentAnswers.length}件`;
+
+
+    if (currentAnswers.length === 0) {
+
+      grid.innerHTML = '<div class="live-empty">回答を待っています……</div>';
+
+      return;
+
+    }
+
+
+    currentAnswers.forEach((ans) => {
+
+      const card = document.createElement("div");
+
+      card.className = "live-answer-card";
+
+
+      const author = document.createElement("div");
+
+      author.className = "live-answer-author";
+
+      author.textContent = ans.author || "無記名";
+
+
+      const text = document.createElement("div");
+
+      text.className = "live-answer-text";
+
+      text.textContent = ans.text || "";
+
+
+      const hideBtn = document.createElement("button");
+
+      hideBtn.className = "hide-answer-button";
+
+      hideBtn.textContent = "非表示";
+
+      hideBtn.onclick = () => deleteAnswer(ans.id);
+
+
+      card.appendChild(author);
+
+      card.appendChild(text);
+
+      card.appendChild(hideBtn);
+
+      grid.appendChild(card);
+
+    });
+
+  }
+
+
+  async function deleteAnswer(id) {
+
+    try {
+
+      await db.collection("answers").doc(id).delete();
+
+    } catch (error) {
+
+      console.error("削除エラー:", error);
+
+    }
+
+  }
+
+
+  async function deleteAllAnswers() {
+
+    if (!confirm("表示中の回答をすべて削除しますか？")) return;
+
+    try {
+
+      const snapshot = await db.collection("answers").get();
+
+      const batch = db.batch();
+
+      snapshot.docs.forEach((doc) => {
+
+        batch.delete(doc.ref);
+
+      });
+
+      await batch.commit();
+
+    } catch (error) {
+
+      console.error("一括削除エラー:", error);
+
+    }
+
+  }
+
+
+  function updateCounts(q1Count, q2Count) {
+
+    const initialEl = document.getElementById("initial-count");
+
+    const finalEl = document.getElementById("final-count");
+
+
+    if (initialEl) initialEl.textContent = q1Count;
+
+    if (finalEl) finalEl.textContent = q2Count;
+
+  }
+
+
+  /*
+   * =====================================================
+   * ランダム指名
+   * =====================================================
+   */
+
+  function randomAnswer() {
+
+    const nameDisplay = document.getElementById("random-name");
+
+    if (!nameDisplay) return;
+
+
+    if (currentAnswers.length === 0) {
+
+      nameDisplay.textContent = "回答がありません";
+
+      return;
+
+    }
+
+
+    let counter = 0;
+
+    const interval = setInterval(() => {
+
+      const randomIndex = Math.floor(Math.random() * currentAnswers.length);
+
+      const selected = currentAnswers[randomIndex];
+
+      nameDisplay.textContent = selected.author || "無記名";
+
+      counter++;
+
+
+      if (counter > 15) {
+
+        clearInterval(interval);
+
+      }
+
+    }, 100);
+
+  }
+
+
+  /*
+   * 初期化
+   */
+
+  window.addEventListener("DOMContentLoaded", () => {
+
+    generateQRCode();
+
+    renderSlide();
+
+    updateTimerDisplay();
+
+  });
+
+</script>
+
+</body>
+</html>
 </body>
 </html>
