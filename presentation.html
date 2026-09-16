@@ -1644,7 +1644,43 @@
       });
 
       updateCounts();
+function renderAnswers() {
 
+  const grid =
+    document.getElementById(
+      "live-answer-grid"
+    );
+
+  if (!grid) return;
+
+  const q1Answers =
+    answers.filter(
+      answer =>
+        answer.questionId === "q1"
+    );
+
+  grid.innerHTML =
+    q1Answers
+      .slice()
+      .reverse()
+      .map(answer => `
+
+        <div class="answer-card">
+
+          <div class="answer-author">
+            ${answer.author || "匿名"}
+          </div>
+
+          <div class="answer-text">
+            ${answer.answer || ""}
+          </div>
+
+        </div>
+
+      `)
+      .join("");
+
+}
     });
 
 
