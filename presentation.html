@@ -493,32 +493,6 @@
 
 
   <!-- ==================================================
-     LIVE ANSWERS
-     ================================================== -->
-
-<section class="slide">
-
-  <div class="flex flex-col h-full">
-
-    <div class="text-blue-600 font-black text-xl">
-      LIVE ANSWERS
-    </div>
-
-    <h2 class="text-6xl font-black text-slate-900 mt-4">
-      みんなの回答
-    </h2>
-
-    <div class="line"></div>
-
-    <div
-      id="live-answer-grid"
-      class="answer-grid">
-    </div>
-
-  </div>
-
-</section>
-  <!-- ==================================================
        SLIDE 5
        ================================================== -->
 
@@ -1644,90 +1618,7 @@
       });
 
       updateCounts();
-      function renderAnswers() {
 
-  const grid =
-    document.getElementById(
-      "live-answer-grid"
-    );
-
-  if (!grid) return;
-
-  const q1Answers =
-    answers.filter(
-      answer =>
-        answer.questionId === "q1"
-    );
-
-  grid.innerHTML =
-    q1Answers
-      .slice()
-      .reverse()
-      .map(answer => `
-
-        <div class="answer-card">
-
-          <div class="answer-author">
-            ${answer.author || "匿名"}
-          </div>
-
-          <div class="answer-text">
-            ${answer.answer || ""}
-          </div>
-
-        </div>
-
-      `)
-      .join("");
-
-}
-renderAnswers();
-``
-.answer-grid {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 18px;
-  margin-top: 30px;
-  max-height: 60vh;
-  overflow-y: auto;
-}
-function renderAnswers() {
-
-  const grid =
-    document.getElementById(
-      "live-answer-grid"
-    );
-
-  if (!grid) return;
-
-  const q1Answers =
-    answers.filter(
-      answer =>
-        answer.questionId === "q1"
-    );
-
-  grid.innerHTML =
-    q1Answers
-      .slice()
-      .reverse()
-      .map(answer => `
-
-        <div class="answer-card">
-
-          <div class="answer-author">
-            ${answer.author || "匿名"}
-          </div>
-
-          <div class="answer-text">
-            ${answer.answer || ""}
-          </div>
-
-        </div>
-
-      `)
-      .join("");
-
-}
     });
 
 
