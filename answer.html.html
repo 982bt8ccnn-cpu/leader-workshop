@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生徒用回答 | リーダー研修</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    body {
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Hiragino Sans",
+        "Yu Gothic",
+        "Meiryo",
+        sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: none;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-100 min-h-screen">
+
+  <div class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-lg">
+
+      <!-- ヘッダー -->
+      <div class="bg-blue-900 text-white rounded-t-3xl px-6 py-5 shadow-lg">
+        <div class="text-sm opacity-80 mb-1">
+          10月全校評議会
+        </div>
+
+        <h1 class="text-2xl font-bold">
+          リーダー研修
+        </h1>
+      </div>
+
+      <!-- メイン -->
+      <div class="bg-white rounded-b-3xl shadow-xl p-6">
+
+        <!-- 接続状態 -->
+        <div class="flex items-center justify-between mb-5">
+          <div class="text-sm text-slate-500">
+            回答フォーム
+          </div>
+
+          <div id="connection-status"
+               class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500">
+            接続確認中
+          </div>
+        </div>
+
+        <!-- 現在の質問 -->
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-6">
+
+          <div class="text-xs font-bold text-blue-600 mb-2">
+            現在の質問
+          </div>
+
+          <div id="question-label"
+               class="text-xl font-bold text-slate-800 leading-relaxed">
+            読み込み中…
+          </div>
+
+        </div>
+
+        <!-- 回答受付状態 -->
+        <div id="closed-message"
+             class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 text-center">
+          <div class="font-bold text-amber-800">
+            現在、回答受付は停止しています
+          </div>
+
+          <div class="text-sm text-amber-700 mt-1">
+            スクリーンの指示を確認してください。
+          </div>
+        </div>
+
+        <!-- フォーム -->
+        <form id="answer-form" class="space-y-5">
+
+          <!-- 名前 -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2">
+              班名 または お名前
+            </label>
+
+            <input
+              type="text"
+              id="author"
+              placeholder="例：1班 / 山田"
+              required
+              maxlength="30"
+              class="w-full border border-slate-300 rounded-xl px-4 py-4 text-lg
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500">
+          </div>
+
+          <!-- 回答 -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2">
+              あなたの考え
+            </label>
+
+            <textarea
+              id="answer-text"
+              rows="6"
+              maxlength="500"
+              placeholder="自分の考えを入力してください"
+              required
+              class="w-full border border-slate-300 rounded-xl px-4 py-4 text-lg
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500">
+            </textarea>
+
+            <div class="text-right text-xs text-slate-400 mt-1">
+              <span id="char-count">0</span> / 500
+            </div>
+          </div>
+
+          <!-- 送信 -->
+          <button
+            type="submit"
+            id="submit-btn"
+            class="w-full bg-blue-700 hover:bg-blue-800 active:bg-blue-900
+                   text-white font-bold text-lg py-4 rounded-xl
+                   shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+            回答を送信
+          </button>
+
+        </form>
+
+        <!-- 送信完了 -->
+        <div id="success-message"
+             class="hidden mt-5 bg-emerald-50 border border-emerald-200
+                    rounded-2xl p-5 text-center">
+
+          <div class="text-3xl mb-2">
+            ✓
+          </div>
+
+          <div class="font-bold text-emerald-800 text-lg">
+            回答を送信しました！
+          </div>
+
+          <div class="text-sm text-emerald-700 mt-1">
+            スクリーンに反映されます。
+          </div>
+
+        </div>
+
+        <div class="text-center text-xs text-slate-400 mt-6">
+          生徒会執行部
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+<script>
+
+  /*
+   * =====================================================
+   * Firebase設定
+   * =====================================================
+   *
+   * ↓↓↓ 自分のFirebaseプロジェクトの設定に変更 ↓↓↓
+   */
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.firebasestorage.app",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  /*
+   * =====================================================
+   * Firebase開始
+   * =====================================================
+   */
+
+  firebase.initializeApp(firebaseConfig);
+
+  const db = firebase.firestore();
+
+
+  /*
+   * =====================================================
+   * 画面要素
+   * =====================================================
+   */
+
+  const form = document.getElementById("answer-form");
+  const authorInput = document.getElementById("author");
+  const answerInput = document.getElementById("answer-text");
+  const submitBtn = document.getElementById("submit-btn");
+
+  const questionLabel =
+    document.getElementById("question-label");
+
+  const closedMessage =
+    document.getElementById("closed-message");
+
+  const successMessage =
+    document.getElementById("success-message");
+
+  const connectionStatus =
+    document.getElementById("connection-status");
+
+  const charCount =
+    document.getElementById("char-count");
+
+
+  /*
+   * =====================================================
+   * 現在の質問
+   * =====================================================
+   */
+
+  let currentQuestionId = null;
+  let currentQuestionLabel = "";
+  let responseOpen = false;
+
+
+  /*
+   * =====================================================
+   * 文字数
+   * =====================================================
+   */
+
+  answerInput.addEventListener("input", () => {
+
+    charCount.textContent =
+      answerInput.value.length;
+
+  });
+
+
+  /*
+   * =====================================================
+   * Firestoreの状態をリアルタイム監視
+   *
+   * screen.html が
+   *
+   * workshop/state
+   *
+   * を変更すると、生徒画面にも即反映される。
+   * =====================================================
+   */
+
+  db.collection("workshop")
+    .doc("state")
+    .onSnapshot((doc) => {
+
+      connectionStatus.textContent = "接続中";
+      connectionStatus.className =
+        "text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-700";
+
+      if (!doc.exists) {
+
+        currentQuestionId = null;
+        currentQuestionLabel =
+          "スクリーンの指示を待っています";
+
+        responseOpen = false;
+
+        updateQuestion();
+
+        return;
+      }
+
+      const data = doc.data();
+
+      currentQuestionId =
+        data.activeQuestionId || null;
+
+      currentQuestionLabel =
+        data.activeQuestionLabel ||
+        "スクリーンの指示を待っています";
+
+      responseOpen =
+        data.responseOpen === true;
+
+      updateQuestion();
+
+    }, (error) => {
+
+      console.error(error);
+
+      connectionStatus.textContent =
+        "接続エラー";
+
+      connectionStatus.className =
+        "text-xs font-bold px-3 py-1 rounded-full bg-red-100 text-red-700";
+
+    });
+
+
+  /*
+   * =====================================================
+   * 質問表示更新
+   * =====================================================
+   */
+
+  function updateQuestion() {
+
+    questionLabel.textContent =
+      currentQuestionLabel;
+
+    if (responseOpen && currentQuestionId) {
+
+      form.classList.remove("hidden");
+      closedMessage.classList.add("hidden");
+
+      submitBtn.disabled = false;
+
+    } else {
+
+      form.classList.add("hidden");
+      closedMessage.classList.remove("hidden");
+
+    }
+
+  }
+
+
+  /*
+   * =====================================================
+   * 回答送信
+   * =====================================================
+   */
+
+  form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    if (!responseOpen || !currentQuestionId) {
+
+      alert("現在は回答を受け付けていません。");
+
+      return;
+
+    }
+
+    const author =
+      authorInput.value.trim();
+
+    const text =
+      answerInput.value.trim();
+
+    if (!author || !text) {
+
+      alert("班名・名前と回答を入力してください。");
+
+      return;
+
+    }
+
+    submitBtn.disabled = true;
+
+    submitBtn.textContent =
+      "送信中…";
+
+    try {
+
+      await db.collection("answers").add({
+
+        author: author,
+
+        questionId: currentQuestionId,
+
+        text: text,
+
+        timestamp:
+          firebase.firestore.FieldValue.serverTimestamp()
+
+      });
+
+      answerInput.value = "";
+
+      charCount.textContent = "0";
+
+      successMessage.classList.remove("hidden");
+
+      setTimeout(() => {
+
+        successMessage.classList.add("hidden");
+
+      }, 3000);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "送信に失敗しました。\n" +
+        error.message
+      );
+
+    } finally {
+
+      submitBtn.disabled = false;
+
+      submitBtn.textContent =
+        "回答を送信";
+
+    }
+
+  });
+
+</script>
+
+</body>
+</html>
