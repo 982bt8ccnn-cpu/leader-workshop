@@ -575,8 +575,7 @@
         </div>
         <div class="flex items-center gap-3 pb-2">
           <span id="live-answer-count" class="text-lg font-black text-slate-500">表示中 0件 / 全0件</span>
-          <button class="control-button" onclick="restoreAllAnswers()">すべて再表示</button>
-          <button class="control-button dark" onclick="hideAllAnswers()">表示中をすべて非表示</button>
+          <button class="control-button dark" onclick="deleteAllAnswers('q1')">最初の回答をすべて削除</button>
         </div>
       </div>
       <div class="live-answer-wrap flex-1 min-h-0">
@@ -1155,8 +1154,9 @@
           </h2>
         </div>
 
-        <div id="final-answer-live-count" class="text-lg font-bold text-slate-500">
-          0件
+        <div class="flex items-center gap-3">
+          <div id="final-answer-live-count" class="text-lg font-bold text-slate-500">0件</div>
+          <button class="control-button dark" onclick="deleteAllAnswers('q2')">最後の回答をすべて削除</button>
         </div>
       </div>
 
@@ -1732,29 +1732,45 @@
       .replace(/'/g, "&#039;");
   }
 
-  function hideAnswer(id) { hiddenAnswerIds.add(id); updateLiveAnswers(); }
-
-  function hideAllAnswers() {
-    answers.filter(a => a.questionId === "q1").forEach(a => hiddenAnswerIds.add(a.id));
-    updateLiveAnswers();
+  async function deleteAnswer(id) {
+    if (!id) return;
+    if (!confirm("この回答を削除しますか？")) return;
+    try {
+      await db.collection("answers").doc(id).delete();
+    } catch (e) {
+      console.error(e);
+      alert("削除できませんでした。");
+    }
   }
 
-  function restoreAllAnswers() { hiddenAnswerIds.clear(); updateLiveAnswers(); }
+  async function deleteAllAnswers(questionId) {
+    const targets = answers.filter(a => a.questionId === questionId);
+    if (!targets.length) return;
+    if (!confirm(`${targets.length}件の回答をすべて削除しますか？`)) return;
+    try {
+      const batch = db.batch();
+      targets.forEach(a => batch.delete(db.collection("answers").doc(a.id)));
+      await batch.commit();
+    } catch (e) {
+      console.error(e);
+      alert("削除できませんでした。");
+    }
+  }
+
 
   function updateLiveAnswers() {
     const grid = document.getElementById("live-answer-grid");
     const count = document.getElementById("live-answer-count");
     if (!grid || !count) return;
     const initialAnswers = answers.filter(a => a.questionId === "q1").slice().sort((a,b) => (a.timestamp?.seconds ?? 0) - (b.timestamp?.seconds ?? 0));
-    const visibleAnswers = initialAnswers.filter(a => !hiddenAnswerIds.has(a.id));
-    count.textContent = `表示中 ${visibleAnswers.length}件 / 全${initialAnswers.length}件`;
-    if (!visibleAnswers.length) {
-      grid.innerHTML = initialAnswers.length ? `<div class="live-empty">現在、表示中の回答はありません</div>` : `<div class="live-empty">回答を待っています……</div>`;
+    count.textContent = `表示中 ${initialAnswers.length}件 / 全${initialAnswers.length}件`;
+    if (!initialAnswers.length) {
+      grid.innerHTML = `<div class="live-empty">回答を待っています……</div>`;
       return;
     }
-    grid.innerHTML = visibleAnswers.map(a => `
+    grid.innerHTML = initialAnswers.map(a => `
       <div class="live-answer-card">
-        <button class="hide-answer-button" onclick="hideAnswer('${escapeHtml(a.id)}')">× 非表示</button>
+        <button class="hide-answer-button" onclick="deleteAnswer('${escapeHtml(a.id)}')">× 削除</button>
         <div class="live-answer-author">${escapeHtml(a.author || "匿名")}</div>
         <div class="live-answer-text">${escapeHtml(a.text || "")}</div>
       </div>
@@ -1780,7 +1796,8 @@
     }
 
     grid.innerHTML = finalAnswers.map(a => `
-      <div class="final-answer-card">
+      <div class="final-answer-card" style="position:relative;">
+        <button class="hide-answer-button" onclick="deleteAnswer('${escapeHtml(a.id)}')">× 削除</button>
         <div class="final-answer-author">${escapeHtml(a.author || "匿名")}</div>
         <div class="final-answer-text">${escapeHtml(a.text || "")}</div>
       </div>
