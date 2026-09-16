@@ -127,25 +127,35 @@
       overflow-wrap: anywhere;
     }
 
+    .live-answer-wrap { margin-top: 24px; }
+    .live-answer-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; height:58vh; overflow-y:auto; padding:4px 8px 8px 2px; align-content:start; }
+    .live-answer-card { position:relative; background:white; border:1px solid #dbeafe; border-radius:18px; padding:18px; box-shadow:0 5px 18px rgba(15,23,42,.07); min-height:145px; }
+    .live-answer-author { color:#2563eb; font-size:15px; font-weight:900; padding-right:78px; margin-bottom:8px; }
+    .live-answer-text { color:#1e293b; font-size:clamp(19px,1.8vw,27px); font-weight:800; line-height:1.45; word-break:normal; overflow-wrap:anywhere; }
+    .hide-answer-button { position:absolute; top:12px; right:12px; border:1px solid #cbd5e1; background:#f8fafc; color:#64748b; border-radius:9px; padding:5px 8px; font-size:12px; font-weight:900; cursor:pointer; }
+    .hide-answer-button:hover { background:#e2e8f0; color:#334155; }
+    .live-empty { grid-column:1 / -1; display:flex; align-items:center; justify-content:center; min-height:220px; border:2px dashed #cbd5e1; border-radius:20px; color:#94a3b8; font-size:24px; font-weight:800; background:rgba(255,255,255,.7); }
+    @media (max-width:900px) { .live-answer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
     .timer-display {
       font-variant-numeric: tabular-nums;
       letter-spacing: 0.05em;
     }
 
     .bottom-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 68px;
-  background: rgba(255,255,255,0.96);
-  border-top: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  z-index: 9999;
-}
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 68px;
+      background: rgba(255,255,255,0.96);
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 9999;
+    }
 
     .top-bar {
       position: absolute;
@@ -484,7 +494,7 @@
       </div>
 
       <p class="text-xl text-slate-400 mt-8">
-        ※QRが読み取れない場合は、近くの生徒会執行部に教えてください。
+        ※QRが読み取れない場合は、画面に表示されるURLを利用してください。
       </p>
 
     </div>
@@ -494,6 +504,34 @@
 
   <!-- ==================================================
        SLIDE 5
+       リアルタイム回答表示
+       ================================================== -->
+
+  <section class="slide">
+    <div class="flex flex-col h-full">
+      <div class="text-blue-600 font-black text-xl">LIVE ANSWERS</div>
+      <div class="flex items-end justify-between gap-6 mt-3">
+        <div>
+          <h2 class="text-6xl font-black text-slate-900">みんなの答え</h2>
+          <div class="line"></div>
+        </div>
+        <div class="flex items-center gap-3 pb-2">
+          <span id="live-answer-count" class="text-lg font-black text-slate-500">表示中 0件 / 全0件</span>
+          <button class="control-button" onclick="restoreAllAnswers()">すべて再表示</button>
+          <button class="control-button dark" onclick="hideAllAnswers()">表示中をすべて非表示</button>
+        </div>
+      </div>
+      <div class="live-answer-wrap flex-1 min-h-0">
+        <div id="live-answer-grid" class="live-answer-grid">
+          <div class="live-empty">回答を待っています……</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 6
        ================================================== -->
 
   <section class="slide">
@@ -683,7 +721,7 @@
         </div>
 
         <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
-          学級委員会で「何か意見はありませんか」と聞いても、<br>
+          「何か意見はありませんか」と聞いても、<br>
           みんなが黙っている。どうする？
         </p>
 
@@ -730,7 +768,7 @@
         </div>
 
         <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
-          クラスの雰囲気を悪くしている人がいる。注意すれば改善するかもしれない。<br>
+          注意すれば改善するかもしれない。<br>
           でも、その人との関係が悪くなるかもしれない。どうする？
         </p>
 
@@ -743,7 +781,7 @@
         </div>
 
         <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
-          清掃や係活動で、一部の人だけが真面目に取り組み、<br>
+          清掃や委員会活動で、一部の人だけが真面目に取り組み、<br>
           負担が偏っている。どうする？
         </p>
 
@@ -826,26 +864,22 @@
        ================================================== -->
 
   <section class="slide">
-
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        NEXT
+    <div class="grid grid-cols-2 gap-12 items-center h-full">
+      <div>
+        <div class="text-blue-600 font-black text-xl">NEXT</div>
+        <h2 class="text-[clamp(60px,8vw,120px)] font-black text-slate-900 mt-3">発表へ。</h2>
+        <div class="line"></div>
+        <p class="text-3xl text-slate-500 font-bold mt-8 leading-relaxed">それぞれの班の考えを<br>聞いてみよう。</p>
       </div>
-
-      <h2 class="text-[clamp(60px,8vw,120px)]
-                 font-black text-slate-900">
-        発表へ。
-      </h2>
-
-      <div class="line"></div>
-
-      <p class="text-3xl text-slate-500 font-bold mt-8">
-        それぞれの班の考えを聞いてみよう。
-      </p>
-
+      <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+        <div class="text-blue-600 font-black text-lg mb-5">PRESENTATION TEMPLATE</div>
+        <div class="space-y-5 text-2xl font-bold text-slate-700 leading-relaxed">
+          <p>私たちの班は、○○な時に○○すると考えました。</p>
+          <p>理由は○○だからです。ただし、○○という問題も考えられます。</p>
+          <p>そのため、○○することが大切だと考えました。</p>
+        </div>
+      </div>
     </div>
-
   </section>
 
 
@@ -868,8 +902,7 @@
       <div class="line"></div>
 
       <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">
-        「私たちの班は、<br>
-        ○○な時に○○すると考えました。」
+        私たちの班の考えを発表します。
       </div>
 
     </div>
@@ -896,8 +929,7 @@
       <div class="line"></div>
 
       <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">
-        「理由は○○だからです。<br>
-        ただし、○○という問題も考えられます。」
+        私たちの班の考えと、<br>        その理由を発表します。
       </div>
 
     </div>
@@ -924,8 +956,7 @@
       <div class="line"></div>
 
       <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">
-        「そのため、○○することが<br>
-        大切だと考えました。」
+        私たちの班が考えた、<br>        より良い方法を発表します。
       </div>
 
     </div>
@@ -982,37 +1013,6 @@
       <p class="text-4xl font-bold text-slate-600 mt-10">
         最後の班です。<br>
         5つの考えを比べてみよう。
-      </p>
-
-    </div>
-
-  </section>
-
-
-  <!-- ==================================================
-       SLIDE 19
-       ================================================== -->
-
-  <section class="slide">
-
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        REFLECTION
-      </div>
-
-      <h2 class="text-6xl font-black text-slate-900 mt-4">
-        5つの問題に
-      </h2>
-
-      <h2 class="text-6xl font-black text-blue-700 mt-2">
-        共通していたことは？
-      </h2>
-
-      <div class="line"></div>
-
-      <p class="text-3xl font-bold text-slate-500 mt-9">
-        みんなで考えてみよう。
       </p>
 
     </div>
@@ -1289,7 +1289,7 @@
    */
 
   const STUDENT_URL =
-  "https://982bt8ccnn-cpu.github.io/leader-workshop/answer.html";
+    "https://982bt8ccnn-cpu.github.io/leader-workshop/answer.html";
 
 
   /*
@@ -1618,8 +1618,55 @@
       });
 
       updateCounts();
+      updateLiveAnswers();
 
     });
+
+
+  /*
+   * =====================================================
+   * リアルタイム回答表示
+   * =====================================================
+   */
+  const hiddenAnswerIds = new Set();
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function hideAnswer(id) { hiddenAnswerIds.add(id); updateLiveAnswers(); }
+
+  function hideAllAnswers() {
+    answers.filter(a => a.questionId === "q1").forEach(a => hiddenAnswerIds.add(a.id));
+    updateLiveAnswers();
+  }
+
+  function restoreAllAnswers() { hiddenAnswerIds.clear(); updateLiveAnswers(); }
+
+  function updateLiveAnswers() {
+    const grid = document.getElementById("live-answer-grid");
+    const count = document.getElementById("live-answer-count");
+    if (!grid || !count) return;
+    const initialAnswers = answers.filter(a => a.questionId === "q1").slice().sort((a,b) => (a.timestamp?.seconds ?? 0) - (b.timestamp?.seconds ?? 0));
+    const visibleAnswers = initialAnswers.filter(a => !hiddenAnswerIds.has(a.id));
+    count.textContent = `表示中 ${visibleAnswers.length}件 / 全${initialAnswers.length}件`;
+    if (!visibleAnswers.length) {
+      grid.innerHTML = initialAnswers.length ? `<div class="live-empty">現在、表示中の回答はありません</div>` : `<div class="live-empty">回答を待っています……</div>`;
+      return;
+    }
+    grid.innerHTML = visibleAnswers.map(a => `
+      <div class="live-answer-card">
+        <button class="hide-answer-button" onclick="hideAnswer('${escapeHtml(a.id)}')">× 非表示</button>
+        <div class="live-answer-author">${escapeHtml(a.author || "匿名")}</div>
+        <div class="live-answer-text">${escapeHtml(a.text || "")}</div>
+      </div>
+    `).join("");
+  }
 
 
   /*
