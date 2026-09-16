@@ -1,542 +1,1590 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>10月全校評議会 | リーダー研修</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      overflow: hidden; background: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
-    }
-    .screen { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
-    .slide {
-      position: absolute; inset: 0; padding: 7vh 7vw; opacity: 0;
-      transform: scale(0.94); pointer-events: none;
-      transition: opacity 0.45s ease, transform 0.55s ease;
-    }
-    .slide.active { opacity: 1; transform: scale(1); pointer-events: auto; }
-    .line { height: 5px; width: 80px; background: #2563eb; border-radius: 999px; margin-top: 20px; }
-    .case-box { border-left: 7px solid #2563eb; background: #eff6ff; border-radius: 0 20px 20px 0; padding: 30px 35px; margin-top: 30px; }
-    .live-answer-wrap { margin-top: 24px; }
-    .live-answer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; height: 58vh; overflow-y: auto; padding: 4px 8px 8px 2px; align-content: start; }
-    .live-answer-card { position: relative; background: white; border: 1px solid #dbeafe; border-radius: 18px; padding: 18px; box-shadow: 0 5px 18px rgba(15, 23, 42, 0.07); min-height: 145px; }
-    .live-answer-author { color: #2563eb; font-size: 15px; font-weight: 900; padding-right: 78px; margin-bottom: 8px; }
-    .live-answer-text { color: #1e293b; font-size: clamp(19px, 1.8vw, 27px); font-weight: 800; line-height: 1.45; word-break: normal; overflow-wrap: anywhere; }
-    .hide-answer-button { position: absolute; top: 12px; right: 12px; border: 1px solid #cbd5e1; background: #f8fafc; color: #64748b; border-radius: 9px; padding: 5px 8px; font-size: 12px; font-weight: 900; cursor: pointer; }
-    .hide-answer-button:hover { background: #e2e8f0; color: #334155; }
-    .live-empty { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; min-height: 220px; border: 2px dashed #cbd5e1; border-radius: 20px; color: #94a3b8; font-size: 24px; font-weight: 800; background: rgba(255, 255, 255, 0.7); }
-    @media (max-width: 900px) { .live-answer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    .bottom-bar { position: fixed; left: 0; right: 0; bottom: 0; height: 68px; background: rgba(255, 255, 255, 0.96); border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 9999; }
-    .top-bar { position: absolute; left: 0; right: 0; top: 0; height: 64px; background: rgba(255, 255, 255, 0.96); border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
-    button { font-family: inherit; }
-    .control-button { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 10px; padding: 8px 13px; font-weight: 800; cursor: pointer; }
-    .control-button:hover { background: #dbeafe; }
-    .control-button.dark { background: #1d4ed8; color: white; border-color: #1d4ed8; }
-    .random-box { background: #eff6ff; border: 2px solid #93c5fd; border-radius: 24px; padding: 35px; margin-top: 35px; text-align: center; }
-    .random-name { font-size: clamp(40px, 6vw, 85px); font-weight: 900; color: #1e40af; margin-top: 15px; }
-    .timer-large { font-size: clamp(90px, 18vw, 250px); font-weight: 900; color: #1e3a8a; line-height: 1; text-align: center; margin-top: 7vh; }
-    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 45px; }
-    .comparison-box { background: #f8fafc; border-radius: 25px; padding: 30px; border: 1px solid #e2e8f0; }
-    .comparison-title { font-size: 20px; font-weight: 900; color: #2563eb; margin-bottom: 15px; }
-    .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-top: 40px; }
-    .summary-item { background: #eff6ff; border-radius: 20px; padding: 25px; font-size: 25px; font-weight: 800; line-height: 1.5; }
-    .summary-item span { color: #2563eb; font-size: 35px; margin-right: 10px; }
-  </style>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+  <title>10月全校評議会 | リーダー研修</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #f8fafc;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Hiragino Sans",
+        "Yu Gothic",
+        "Meiryo",
+        sans-serif;
+    }
+
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 7vh 7vw;
+      opacity: 0;
+      transform: scale(0.94);
+      pointer-events: none;
+      transition:
+        opacity 0.45s ease,
+        transform 0.55s ease;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .blue {
+      color: #1e3a8a;
+    }
+
+    .line {
+      height: 5px;
+      width: 80px;
+      background: #2563eb;
+      border-radius: 999px;
+      margin-top: 20px;
+    }
+
+    .big-number {
+      font-size: clamp(70px, 12vw, 180px);
+      font-weight: 900;
+      line-height: 0.9;
+      color: #dbeafe;
+      position: absolute;
+      right: 6vw;
+      bottom: 4vh;
+    }
+
+    .case-box {
+      border-left: 7px solid #2563eb;
+      background: #eff6ff;
+      border-radius: 0 20px 20px 0;
+      padding: 30px 35px;
+      margin-top: 30px;
+    }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 30px;
+      max-height: 52vh;
+      overflow: hidden;
+    }
+
+    .answer-card {
+      background: white;
+      border: 1px solid #dbeafe;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 5px 18px rgba(15, 23, 42, 0.07);
+    }
+
+    .answer-author {
+      font-size: 14px;
+      color: #2563eb;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .answer-text {
+      font-size: clamp(18px, 2vw, 28px);
+      font-weight: 700;
+      line-height: 1.5;
+      color: #1e293b;
+      word-break: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .live-answer-wrap { margin-top: 24px; }
+    .live-answer-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; height:58vh; overflow-y:auto; padding:4px 8px 8px 2px; align-content:start; }
+    .live-answer-card { position:relative; background:white; border:1px solid #dbeafe; border-radius:18px; padding:18px; box-shadow:0 5px 18px rgba(15,23,42,.07); min-height:145px; }
+    .live-answer-author { color:#2563eb; font-size:15px; font-weight:900; padding-right:78px; margin-bottom:8px; }
+    .live-answer-text { color:#1e293b; font-size:clamp(19px,1.8vw,27px); font-weight:800; line-height:1.45; word-break:normal; overflow-wrap:anywhere; }
+    .hide-answer-button { position:absolute; top:12px; right:12px; border:1px solid #cbd5e1; background:#f8fafc; color:#64748b; border-radius:9px; padding:5px 8px; font-size:12px; font-weight:900; cursor:pointer; }
+    .hide-answer-button:hover { background:#e2e8f0; color:#334155; }
+    .live-empty { grid-column:1 / -1; display:flex; align-items:center; justify-content:center; min-height:220px; border:2px dashed #cbd5e1; border-radius:20px; color:#94a3b8; font-size:24px; font-weight:800; background:rgba(255,255,255,.7); }
+    @media (max-width:900px) { .live-answer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+    .timer-display {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+    }
+
+    .bottom-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 68px;
+      background: rgba(255,255,255,0.96);
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 9999;
+    }
+
+    .top-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 64px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    .control-button {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 8px 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .control-button:hover {
+      background: #dbeafe;
+    }
+
+    .control-button.dark {
+      background: #1d4ed8;
+      color: white;
+      border-color: #1d4ed8;
+    }
+
+    .random-box {
+      background: #eff6ff;
+      border: 2px solid #93c5fd;
+      border-radius: 24px;
+      padding: 35px;
+      margin-top: 35px;
+      text-align: center;
+    }
+
+    .random-name {
+      font-size: clamp(40px, 6vw, 85px);
+      font-weight: 900;
+      color: #1e40af;
+      margin-top: 15px;
+    }
+
+    .timer-large {
+      font-size: clamp(90px, 18vw, 250px);
+      font-weight: 900;
+      color: #1e3a8a;
+      line-height: 1;
+      text-align: center;
+      margin-top: 7vh;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 45px;
+    }
+
+    .comparison-box {
+      background: #f8fafc;
+      border-radius: 25px;
+      padding: 30px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .comparison-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #2563eb;
+      margin-bottom: 15px;
+    }
+
+    .comparison-answer {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin-top: 40px;
+    }
+
+    .summary-item {
+      background: #eff6ff;
+      border-radius: 20px;
+      padding: 25px;
+      font-size: 25px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .summary-item span {
+      color: #2563eb;
+      font-size: 35px;
+      margin-right: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+  </style>
 </head>
+
+
 <body>
+
 <div class="screen">
-  <div class="top-bar">
-    <div class="flex items-center gap-4">
-      <div class="font-black text-blue-900">10月全校評議会</div>
-      <div class="text-slate-400">|</div>
-      <div class="font-bold text-slate-600">リーダー研修</div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span id="firebase-status" class="text-xs font-bold px-3 py-2 rounded-full bg-slate-100 text-slate-500">Firebase確認中</span>
-      <span id="response-status" class="text-xs font-bold px-3 py-2 rounded-full bg-slate-100 text-slate-500">回答停止中</span>
-      <button class="control-button" onclick="setTimer(1)">1分</button>
-      <button class="control-button" onclick="setTimer(3)">3分</button>
-      <button class="control-button" onclick="setTimer(5)">5分</button>
-      <button class="control-button" onclick="setTimer(7)">7分</button>
-      <button class="control-button" onclick="toggleTimer()">▶ / ❚❚</button>
-      <button class="control-button" onclick="resetTimer()">リセット</button>
-    </div>
-  </div>
 
-  <section class="slide active">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-2xl">10月全校評議会</div>
-      <h1 class="text-[clamp(60px,9vw,140px)] font-black text-slate-900 leading-tight mt-4">リーダー研修</h1>
-      <div class="line"></div>
-      <p class="text-3xl text-slate-500 font-bold mt-7">「リーダーって、何？」</p>
-    </div>
-  </section>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">TODAY'S PURPOSE</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">今日の目的</h2>
-      <div class="line"></div>
-      <p class="text-4xl font-bold text-slate-700 mt-10 leading-relaxed">「リーダーとは何か」を<br>自分たちで考える。</p>
-      <p class="text-2xl text-slate-500 mt-7">正解を覚える時間ではありません。</p>
-    </div>
-  </section>
+  <!-- ==================================================
+       上部操作バー
+       ================================================== -->
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">QUESTION 01</div>
-      <h2 class="text-[clamp(55px,8vw,120px)] font-black text-slate-900 mt-5">リーダーって、何？</h2>
-      <div class="line"></div>
-      <p class="text-3xl text-slate-500 font-bold mt-8">まずは、自分のイメージを考えてみよう。</p>
-    </div>
-  </section>
+  <div class="top-bar">
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">ANSWER</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">自分の答えを送ろう</h2>
-      <div class="line"></div>
-      <div class="mt-10 flex gap-8 items-center">
-        <div id="qr-code" class="bg-white p-4 rounded-2xl border border-slate-200"></div>
-        <div>
-          <p class="text-3xl font-black text-blue-900">① QRコードを読み取る</p>
-          <p class="text-3xl font-black text-blue-900 mt-5">② 自分の考えを入力</p>
-          <p class="text-3xl font-black text-blue-900 mt-5">③ 送信</p>
-        </div>
-      </div>
-      <p class="text-xl text-slate-400 mt-8">※QRが読み取れない場合は、画面に表示されるURLを利用してください。</p>
-    </div>
-  </section>
+    <div class="flex items-center gap-4">
 
-  <section class="slide">
-    <div class="flex flex-col h-full">
-      <div class="text-blue-600 font-black text-xl">LIVE ANSWERS</div>
-      <div class="flex items-end justify-between gap-6 mt-3">
-        <div>
-          <h2 class="text-6xl font-black text-slate-900">みんなの答え</h2>
-          <div class="line"></div>
-        </div>
-        <div class="flex items-center gap-3 pb-2">
-          <span id="live-answer-count" class="text-lg font-black text-slate-500">回答 0件</span>
-          <button class="control-button dark" onclick="deleteAllAnswers()">表示中をすべて削除</button>
-        </div>
-      </div>
-      <div class="live-answer-wrap flex-1 min-h-0">
-        <div id="live-answer-grid" class="live-answer-grid">
-          <div class="live-empty">回答を待っています……</div>
-        </div>
-      </div>
-    </div>
-  </section>
+      <div class="font-black text-blue-900">
+        10月全校評議会
+      </div>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">THINK</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">なぜ、そう思った？</h2>
-      <div class="line"></div>
-      <p class="text-3xl text-slate-600 font-bold mt-8">2〜3人に、理由を聞きます。</p>
-      <div class="random-box">
-        <div class="text-xl font-bold text-blue-600">ランダム指名</div>
-        <div id="random-name" class="random-name">？</div>
-        <button onclick="randomAnswer()" class="mt-5 bg-blue-700 text-white font-black text-xl px-8 py-4 rounded-xl">ランダムで選ぶ</button>
-      </div>
-    </div>
-  </section>
+      <div class="text-slate-400">
+        |
+      </div>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">TODAY'S FLOW</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">最初と最後で、どう変わる？</h2>
-      <div class="line"></div>
-      <div class="comparison">
-        <div class="comparison-box">
-          <div class="comparison-title">最初</div>
-          <div class="text-3xl font-black">リーダーって何？</div>
-        </div>
-        <div class="comparison-box">
-          <div class="comparison-title">最後</div>
-          <div class="text-3xl font-black">リーダーとは？</div>
-        </div>
-      </div>
-      <p class="text-2xl text-slate-500 mt-8">今日の活動を通して、自分の考えがどう変わったか見てみよう。</p>
-    </div>
-  </section>
+      <div class="font-bold text-slate-600">
+        リーダー研修
+      </div>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">GROUP WORK</div>
-      <h2 class="text-7xl font-black text-slate-900 mt-4">ここから、班で考えます。</h2>
-      <div class="line"></div>
-      <p class="text-3xl text-slate-600 font-bold mt-9">5つの「リアルな問題」を考えます。</p>
-      <div class="mt-10 text-2xl font-bold text-slate-500">
-        1班 → ケース1  2班 → ケース2  3班 → ケース3<br>
-        4班 → ケース4  5班 → ケース5
-      </div>
-    </div>
-  </section>
+    </div>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">IMPORTANT</div>
-      <h2 class="text-7xl font-black text-slate-900 mt-4">今日の問題には、</h2>
-      <h2 class="text-7xl font-black text-blue-700 mt-2">決まった正解はありません。</h2>
-      <div class="line"></div>
-      <p class="text-3xl text-slate-600 font-bold mt-9 leading-relaxed">「自分ならどうするか」<br>「なぜそうするのか」まで考えよう。</p>
-    </div>
-  </section>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">CASE 01 / 02</div>
-      <h2 class="text-5xl font-black text-slate-900 mt-4">1班・2班</h2>
-      <div class="case-box">
-        <div class="text-2xl font-black text-blue-800">1班</div>
-        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">「何か意見はありませんか」と聞いても、<br>みんなが黙っている。どうする？</p>
-      </div>
-      <div class="case-box">
-        <div class="text-2xl font-black text-blue-800">2班</div>
-        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">注意・声かけをしたら、<br>「なんでそんなん言われなあかんの？」と言われた。どうする？</p>
-      </div>
-    </div>
-  </section>
+    <div class="flex items-center gap-2">
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">CASE 03 / 04</div>
-      <h2 class="text-5xl font-black text-slate-900 mt-4">3班・4班</h2>
-      <div class="case-box">
-        <div class="text-2xl font-black text-blue-800">3班</div>
-        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">注意すれば改善するかもしれない。<br>でも、その人との関係が悪くなるかもしれない。どうする？</p>
-      </div>
-      <div class="case-box">
-        <div class="text-2xl font-black text-blue-800">4班</div>
-        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">清掃や委員会活動で、一部の人だけが真面目に取り組み、<br>負担が偏っている。どうする？</p>
-      </div>
-    </div>
-  </section>
+      <span
+        id="firebase-status"
+        class="text-xs font-bold px-3 py-2 rounded-full bg-slate-100 text-slate-500">
+        Firebase確認中
+      </span>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">CASE 05</div>
-      <h2 class="text-5xl font-black text-slate-900 mt-4">5班</h2>
-      <div class="case-box">
-        <p class="text-3xl font-bold text-slate-700 leading-relaxed">最初はみんなで決めたルールなのに、<br>時間が経つにつれて守られなくなってきた。</p>
-        <p class="text-4xl font-black text-blue-800 mt-7">どうする？</p>
-      </div>
-    </div>
-  </section>
+      <span
+        id="response-status"
+        class="text-xs font-bold px-3 py-2 rounded-full bg-slate-100 text-slate-500">
+        回答停止中
+      </span>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">DISCUSSION</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">話し合い</h2>
-      <div class="line"></div>
-      <div id="timer-display-main" class="timer-large">07:00</div>
-      <p class="text-2xl text-center font-bold text-slate-500 mt-3">班で「どうするか」「なぜそうするか」を考えよう。</p>
-    </div>
-  </section>
+      <button
+        class="control-button"
+        onclick="setTimer(1)">
+        1分
+      </button>
 
-  <section class="slide">
-    <div class="grid grid-cols-2 gap-12 items-center h-full">
-      <div>
-        <div class="text-blue-600 font-black text-xl">NEXT</div>
-        <h2 class="text-[clamp(60px,8vw,120px)] font-black text-slate-900 mt-3">発表へ。</h2>
-        <div class="line"></div>
-        <p class="text-3xl text-slate-500 font-bold mt-8 leading-relaxed">それぞれの班の考えを<br>聞いてみよう。</p>
-      </div>
-      <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
-        <div class="text-blue-600 font-black text-lg mb-5">PRESENTATION TEMPLATE</div>
-        <div class="space-y-5 text-2xl font-bold text-slate-700 leading-relaxed">
-          <p>私たちの班は、○○な時に○○すると考えました。</p>
-          <p>理由は○○だからです。ただし、○○という問題も考えられます。</p>
-          <p>そのため、○○することが大切だと考えました。</p>
-        </div>
-      </div>
-    </div>
-  </section>
+      <button
+        class="control-button"
+        onclick="setTimer(3)">
+        3分
+      </button>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">PRESENTATION</div>
-      <h2 class="text-6xl font-black text-slate-900">1班</h2>
-      <div class="line"></div>
-      <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">私たちの班の考えを発表します。</div>
-    </div>
-  </section>
+      <button
+        class="control-button"
+        onclick="setTimer(5)">
+        5分
+      </button>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">PRESENTATION</div>
-      <h2 class="text-6xl font-black text-slate-900">2班</h2>
-      <div class="line"></div>
-      <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">私たちの班の考えと、<br>その理由を発表します。</div>
-    </div>
-  </section>
+      <button
+        class="control-button"
+        onclick="setTimer(7)">
+        7分
+      </button>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">PRESENTATION</div>
-      <h2 class="text-6xl font-black text-slate-900">3班</h2>
-      <div class="line"></div>
-      <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">私たちの班が考えた、<br>より良い方法を発表します。</div>
-    </div>
-  </section>
+      <button
+        class="control-button"
+        onclick="toggleTimer()">
+        ▶ / ❚❚
+      </button>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">PRESENTATION</div>
-      <h2 class="text-6xl font-black text-slate-900">4班</h2>
-      <div class="line"></div>
-      <p class="text-4xl font-bold text-slate-600 mt-10">自分たちの考えと、<br>その理由を発表します。</p>
-    </div>
-  </section>
+      <button
+        class="control-button"
+        onclick="resetTimer()">
+        リセット
+      </button>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">PRESENTATION</div>
-      <h2 class="text-6xl font-black text-slate-900">5班</h2>
-      <div class="line"></div>
-      <p class="text-4xl font-bold text-slate-600 mt-10">最後の班です。<br>5つの考えを比べてみよう。</p>
-    </div>
-  </section>
+    </div>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">QUESTION 02</div>
-      <h2 class="text-[clamp(50px,7vw,110px)] font-black text-slate-900 mt-4">リーダーって、何？</h2>
-      <div class="line"></div>
-      <p class="text-3xl font-bold text-slate-500 mt-8">最初に考えた答えと、今の答えを比べてみよう。</p>
-    </div>
-  </section>
+  </div>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">FINAL ANSWER</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">最後の答えを送ろう</h2>
-      <div class="line"></div>
-      <div class="mt-12 text-4xl font-black text-blue-800">「あなたにとって、リーダーとは？」</div>
-      <p class="text-2xl text-slate-500 font-bold mt-6">自分の言葉で書いてください。</p>
-    </div>
-  </section>
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">COMPARISON</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">最初と最後を比べてみよう</h2>
-      <div class="comparison">
-        <div class="comparison-box">
-          <div class="comparison-title">最初の答え</div>
-          <div id="initial-count" class="text-5xl font-black text-slate-800">0</div>
-          <div class="text-xl text-slate-500 mt-2">件の回答</div>
-        </div>
-        <div class="comparison-box">
-          <div class="comparison-title">最後の答え</div>
-          <div id="final-count" class="text-5xl font-black text-slate-800">0</div>
-          <div class="text-xl text-slate-500 mt-2">件の回答</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- ==================================================
+       SLIDE 1
+       ================================================== -->
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">SUMMARY</div>
-      <h2 class="text-6xl font-black text-slate-900 mt-4">リーダーの役割</h2>
-      <div class="line"></div>
-      <div class="summary-grid">
-        <div class="summary-item"><span>01</span>周りの人の意見を聞く</div>
-        <div class="summary-item"><span>02</span>困っている人を支える</div>
-        <div class="summary-item"><span>03</span>必要なときには、自分で決断する</div>
-        <div class="summary-item"><span>04</span>周りと一緒に、より良い方法を考える</div>
-      </div>
-    </div>
-  </section>
+  <section class="slide active">
 
-  <section class="slide">
-    <div class="flex flex-col justify-center h-full">
-      <div class="text-blue-600 font-black text-xl">END</div>
-      <h2 class="text-[clamp(55px,8vw,120px)] font-black text-slate-900">リーダーに、</h2>
-      <h2 class="text-[clamp(55px,8vw,120px)] font-black text-blue-700">ひとつの形はない。</h2>
-      <div class="line"></div>
-      <p class="text-3xl text-slate-500 font-bold mt-8">だからこそ、周りと考え、行動することが大切です。</p>
-      <p class="text-2xl text-slate-400 mt-7">以上で、リーダー研修を終わります。ありがとうございました。</p>
-    </div>
-  </section>
+    <div class="flex flex-col justify-center h-full">
 
-  <div class="bottom-bar">
-    <button class="control-button" onclick="previousSlide()">← 前へ</button>
-    <div class="flex items-center gap-4">
-      <span id="slide-number" class="font-black text-slate-700">1 / 23</span>
-      <button class="control-button dark" onclick="nextSlide()">次へ →</button>
-    </div>
-  </div>
+      <div class="text-blue-600 font-black text-2xl">
+        10月全校評議会
+      </div>
+
+      <h1
+        class="text-[clamp(60px,9vw,140px)] font-black
+               text-slate-900 leading-tight mt-4">
+        リーダー研修
+      </h1>
+
+      <div class="line"></div>
+
+      <p class="text-3xl text-slate-500 font-bold mt-7">
+        「リーダーって、何？」
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 2
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        TODAY'S PURPOSE
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        今日の目的
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-4xl font-bold text-slate-700 mt-10 leading-relaxed">
+        「リーダーとは何か」を<br>
+        自分たちで考える。
+      </p>
+
+      <p class="text-2xl text-slate-500 mt-7">
+        正解を覚える時間ではありません。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 3
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        QUESTION 01
+      </div>
+
+      <h2 class="text-[clamp(55px,8vw,120px)] font-black
+                 text-slate-900 mt-5">
+        リーダーって、何？
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-3xl text-slate-500 font-bold mt-8">
+        まずは、自分のイメージを考えてみよう。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 4
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        ANSWER
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        自分の答えを送ろう
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="mt-10 flex gap-8 items-center">
+
+        <div
+          id="qr-code"
+          class="bg-white p-4 rounded-2xl border border-slate-200">
+        </div>
+
+        <div>
+
+          <p class="text-3xl font-black text-blue-900">
+            ① QRコードを読み取る
+          </p>
+
+          <p class="text-3xl font-black text-blue-900 mt-5">
+            ② 自分の考えを入力
+          </p>
+
+          <p class="text-3xl font-black text-blue-900 mt-5">
+            ③ 送信
+          </p>
+
+        </div>
+
+      </div>
+
+      <p class="text-xl text-slate-400 mt-8">
+        ※QRが読み取れない場合は、画面に表示されるURLを利用してください。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 5
+       リアルタイム回答表示
+       ================================================== -->
+
+  <section class="slide">
+    <div class="flex flex-col h-full">
+      <div class="text-blue-600 font-black text-xl">LIVE ANSWERS</div>
+      <div class="flex items-end justify-between gap-6 mt-3">
+        <div>
+          <h2 class="text-6xl font-black text-slate-900">みんなの答え</h2>
+          <div class="line"></div>
+        </div>
+        <div class="flex items-center gap-3 pb-2">
+          <span id="live-answer-count" class="text-lg font-black text-slate-500">回答 0件</span>
+          <button class="control-button dark" onclick="deleteAllAnswers()">表示中をすべて削除</button>
+        </div>
+      </div>
+      <div class="live-answer-wrap flex-1 min-h-0">
+        <div id="live-answer-grid" class="live-answer-grid">
+          <div class="live-empty">回答を待っています……</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 6
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        THINK
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        なぜ、そう思った？
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-3xl text-slate-600 font-bold mt-8">
+        2〜3人に、理由を聞きます。
+      </p>
+
+      <div class="random-box">
+
+        <div class="text-xl font-bold text-blue-600">
+          ランダム指名
+        </div>
+
+        <div
+          id="random-name"
+          class="random-name">
+          ？
+        </div>
+
+        <button
+          onclick="randomAnswer()"
+          class="mt-5 bg-blue-700 text-white
+                 font-black text-xl px-8 py-4
+                 rounded-xl">
+          ランダムで選ぶ
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 6
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        TODAY'S FLOW
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        最初と最後で、どう変わる？
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="comparison">
+
+        <div class="comparison-box">
+
+          <div class="comparison-title">
+            最初
+          </div>
+
+          <div class="text-3xl font-black">
+            リーダーって何？
+          </div>
+
+        </div>
+
+        <div class="comparison-box">
+
+          <div class="comparison-title">
+            最後
+          </div>
+
+          <div class="text-3xl font-black">
+            リーダーとは？
+          </div>
+
+        </div>
+
+      </div>
+
+      <p class="text-2xl text-slate-500 mt-8">
+        今日の活動を通して、自分の考えがどう変わったか見てみよう。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 7
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        GROUP WORK
+      </div>
+
+      <h2 class="text-7xl font-black text-slate-900 mt-4">
+        ここから、班で考えます。
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-3xl text-slate-600 font-bold mt-9">
+        5つの「リアルな問題」を考えます。
+      </p>
+
+      <div class="mt-10 text-2xl font-bold text-slate-500">
+        1班 → ケース1　　2班 → ケース2　　3班 → ケース3<br>
+        4班 → ケース4　　5班 → ケース5
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 8
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        IMPORTANT
+      </div>
+
+      <h2 class="text-7xl font-black text-slate-900 mt-4">
+        今日の問題には、
+      </h2>
+
+      <h2 class="text-7xl font-black text-blue-700 mt-2">
+        決まった正解はありません。
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-3xl text-slate-600 font-bold mt-9 leading-relaxed">
+        「自分ならどうするか」<br>
+        「なぜそうするのか」まで考えよう。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 9
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        CASE 01 / 02
+      </div>
+
+      <h2 class="text-5xl font-black text-slate-900 mt-4">
+        1班・2班
+      </h2>
+
+      <div class="case-box">
+
+        <div class="text-2xl font-black text-blue-800">
+          1班
+        </div>
+
+        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
+          「何か意見はありませんか」と聞いても、<br>
+          みんなが黙っている。どうする？
+        </p>
+
+      </div>
+
+      <div class="case-box">
+
+        <div class="text-2xl font-black text-blue-800">
+          2班
+        </div>
+
+        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
+          注意・声かけをしたら、<br>
+          「なんでそんなん言われなあかんの？」と言われた。どうする？
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 10
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        CASE 03 / 04
+      </div>
+
+      <h2 class="text-5xl font-black text-slate-900 mt-4">
+        3班・4班
+      </h2>
+
+      <div class="case-box">
+
+        <div class="text-2xl font-black text-blue-800">
+          3班
+        </div>
+
+        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
+          注意すれば改善するかもしれない。<br>
+          でも、その人との関係が悪くなるかもしれない。どうする？
+        </p>
+
+      </div>
+
+      <div class="case-box">
+
+        <div class="text-2xl font-black text-blue-800">
+          4班
+        </div>
+
+        <p class="text-2xl font-bold text-slate-700 mt-3 leading-relaxed">
+          清掃や委員会活動で、一部の人だけが真面目に取り組み、<br>
+          負担が偏っている。どうする？
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 11
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        CASE 05
+      </div>
+
+      <h2 class="text-5xl font-black text-slate-900 mt-4">
+        5班
+      </h2>
+
+      <div class="case-box">
+
+        <p class="text-3xl font-bold text-slate-700 leading-relaxed">
+          最初はみんなで決めたルールなのに、<br>
+          時間が経つにつれて守られなくなってきた。
+        </p>
+
+        <p class="text-4xl font-black text-blue-800 mt-7">
+          どうする？
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 12
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        DISCUSSION
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        話し合い
+      </h2>
+
+      <div class="line"></div>
+
+      <div
+        id="timer-display-main"
+        class="timer-large">
+        07:00
+      </div>
+
+      <p class="text-2xl text-center font-bold text-slate-500 mt-3">
+        班で「どうするか」「なぜそうするか」を考えよう。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 13
+       ================================================== -->
+
+  <section class="slide">
+    <div class="grid grid-cols-2 gap-12 items-center h-full">
+      <div>
+        <div class="text-blue-600 font-black text-xl">NEXT</div>
+        <h2 class="text-[clamp(60px,8vw,120px)] font-black text-slate-900 mt-3">発表へ。</h2>
+        <div class="line"></div>
+        <p class="text-3xl text-slate-500 font-bold mt-8 leading-relaxed">それぞれの班の考えを<br>聞いてみよう。</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+        <div class="text-blue-600 font-black text-lg mb-5">PRESENTATION TEMPLATE</div>
+        <div class="space-y-5 text-2xl font-bold text-slate-700 leading-relaxed">
+          <p>私たちの班は、○○な時に○○すると考えました。</p>
+          <p>理由は○○だからです。ただし、○○という問題も考えられます。</p>
+          <p>そのため、○○することが大切だと考えました。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 14
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        PRESENTATION
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900">
+        1班
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">
+        私たちの班の考えを発表します。
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 15
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        PRESENTATION
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900">
+        2班
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">
+        私たちの班の考えと、<br>        その理由を発表します。
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 16
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        PRESENTATION
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900">
+        3班
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="mt-12 text-4xl font-bold text-slate-700 leading-relaxed">
+        私たちの班が考えた、<br>        より良い方法を発表します。
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 17
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        PRESENTATION
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900">
+        4班
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-4xl font-bold text-slate-600 mt-10">
+        自分たちの考えと、<br>
+        その理由を発表します。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 18
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        PRESENTATION
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900">
+        5班
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-4xl font-bold text-slate-600 mt-10">
+        最後の班です。<br>
+        5つの考えを比べてみよう。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 20
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        QUESTION 02
+      </div>
+
+      <h2 class="text-[clamp(50px,7vw,110px)]
+                 font-black text-slate-900 mt-4">
+        リーダーって、何？
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-3xl font-bold text-slate-500 mt-8">
+        最初に考えた答えと、今の答えを比べてみよう。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 21
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        FINAL ANSWER
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        最後の答えを送ろう
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="mt-12 text-4xl font-black text-blue-800">
+        「あなたにとって、リーダーとは？」
+      </div>
+
+      <p class="text-2xl text-slate-500 font-bold mt-6">
+        自分の言葉で書いてください。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 22
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        COMPARISON
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        最初と最後を比べてみよう
+      </h2>
+
+      <div class="comparison">
+
+        <div class="comparison-box">
+
+          <div class="comparison-title">
+            最初の答え
+          </div>
+
+          <div id="initial-count"
+               class="text-5xl font-black text-slate-800">
+            0
+          </div>
+
+          <div class="text-xl text-slate-500 mt-2">
+            件の回答
+          </div>
+
+        </div>
+
+
+        <div class="comparison-box">
+
+          <div class="comparison-title">
+            最後の答え
+          </div>
+
+          <div id="final-count"
+               class="text-5xl font-black text-slate-800">
+            0
+          </div>
+
+          <div class="text-xl text-slate-500 mt-2">
+            件の回答
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 23
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        SUMMARY
+      </div>
+
+      <h2 class="text-6xl font-black text-slate-900 mt-4">
+        リーダーの役割
+      </h2>
+
+      <div class="line"></div>
+
+      <div class="summary-grid">
+
+        <div class="summary-item">
+          <span>01</span>
+          周りの人の意見を聞く
+        </div>
+
+        <div class="summary-item">
+          <span>02</span>
+          困っている人を支える
+        </div>
+
+        <div class="summary-item">
+          <span>03</span>
+          必要なときには、自分で決断する
+        </div>
+
+        <div class="summary-item">
+          <span>04</span>
+          周りと一緒に、より良い方法を考える
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       SLIDE 24
+       ================================================== -->
+
+  <section class="slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        END
+      </div>
+
+      <h2 class="text-[clamp(55px,8vw,120px)]
+                 font-black text-slate-900">
+        リーダーに、
+      </h2>
+
+      <h2 class="text-[clamp(55px,8vw,120px)]
+                 font-black text-blue-700">
+        ひとつの形はない。
+      </h2>
+
+      <div class="line"></div>
+
+      <p class="text-3xl text-slate-500 font-bold mt-8">
+        だからこそ、周りと考え、行動することが大切です。
+      </p>
+
+      <p class="text-2xl text-slate-400 mt-7">
+        以上で、リーダー研修を終わります。ありがとうございました。
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
+       下部操作バー
+       ================================================== -->
+
+  <div class="bottom-bar">
+
+    <button
+      class="control-button"
+      onclick="previousSlide()">
+      ← 前へ
+    </button>
+
+
+    <div class="flex items-center gap-4">
+
+      <span
+        id="slide-number"
+        class="font-black text-slate-700">
+        1 / 24
+      </span>
+
+      <button
+        class="control-button dark"
+        onclick="nextSlide()">
+        次へ →
+      </button>
+
+    </div>
+
+  </div>
+
+
 </div>
 
+
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCIq-Xrjy5RFbL3REVnGDWvaP5pxXQ7HYk",
-    authDomain: "october-leader-workshop.firebaseapp.com",
-    projectId: "october-leader-workshop",
-    storageBucket: "october-leader-workshop.firebasestorage.app",
-    messagingSenderId: "543229525027",
-    appId: "1:543229525027:web:d0a1d0754da97d1a060596"
-  };
 
-  const STUDENT_URL = "https://982bt8ccnn-cpu.github.io/leader-workshop/answer.html";
+  /*
+   * =====================================================
+   * Firebase設定
+   * =====================================================
+   *
+   * ↓↓↓ 自分のFirebaseプロジェクトの設定に変更 ↓↓↓
+   */
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  const firebaseConfig = {
+  apiKey: "AIzaSyCIq-Xrjy5RFbL3REVnGDWvaP5pxXQ7HYk",
+  authDomain: "october-leader-workshop.firebaseapp.com",
+  projectId: "october-leader-workshop",
+  storageBucket: "october-leader-workshop.firebasestorage.app",
+  messagingSenderId: "543229525027",
+  appId: "1:543229525027:web:d0a1d0754da97d1a060596"
+};
 
-  const slides = document.querySelectorAll(".slide");
-  let currentSlide = 0;
 
-  // QRコード初期化
-  new QRCode(document.getElementById("qr-code"), {
-    text: STUDENT_URL,
-    width: 160,
-    height: 160
-  });
+  /*
+   * =====================================================
+   * 生徒用ページのURL
+   *
+   * QRコードにするURL
+   *
+   * ここを自分のstudent.htmlのURLに変更
+   * =====================================================
+   */
 
-  function renderSlide() {
-    slides.forEach((slide, index) => {
-      slide.classList.toggle("active", index === currentSlide);
-    });
-    document.getElementById("slide-number").textContent = `${currentSlide + 1} / ${slides.length}`;
+  const STUDENT_URL =
+    "https://982bt8ccnn-cpu.github.io/leader-workshop/answer.html";
 
-    if (currentSlide === 11) setTimer(7);
-    if (currentSlide === 2 || currentSlide === 3 || currentSlide === 4) {
-      openResponse("q1", "リーダーってどんな人？");
-    }
-    if (currentSlide === 19) {
-      openResponse("q2", "あなたにとって、リーダーとは？");
-    }
-  }
 
-  function nextSlide() {
-    if (currentSlide < slides.length - 1) {
-      currentSlide++;
-      renderSlide();
-    }
-  }
+  /*
+   * =====================================================
+   * Firebase開始
+   * =====================================================
+   */
 
-  function previousSlide() {
-    if (currentSlide > 0) {
-      currentSlide--;
-      renderSlide();
-    }
-  }
+  firebase.initializeApp(firebaseConfig);
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowRight" || event.key === " ") nextSlide();
-    if (event.key === "ArrowLeft") previousSlide();
-  });
+  const db = firebase.firestore();
 
-  // Firebase接続状態
-  db.collection("workshop").doc("state").onSnapshot(
-    () => {
-      const status = document.getElementById("firebase-status");
-      status.textContent = "Firebase接続中";
-      status.className = "text-xs font-bold px-3 py-2 rounded-full bg-emerald-100 text-emerald-700";
-    },
-    () => {
-      const status = document.getElementById("firebase-status");
-      status.textContent = "Firebase接続エラー";
-      status.className = "text-xs font-bold px-3 py-2 rounded-full bg-red-100 text-red-700";
-    }
-  );
 
-  async function openResponse(questionId, label) {
-    try {
-      await db.collection("workshop").doc("state").set({
-        activeQuestionId: questionId,
-        activeQuestionLabel: label,
-        responseOpen: true
-      }, { merge: true });
-      updateResponseStatus(true);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  /*
+   * =====================================================
+   * スライド
+   * =====================================================
+   */
 
-  async function closeResponse() {
-    try {
-      await db.collection("workshop").doc("state").set({
-        responseOpen: false
-      }, { merge: true });
-      updateResponseStatus(false);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const slides =
+    document.querySelectorAll(".slide");
 
-  function updateResponseStatus(open) {
-    const element = document.getElementById("response-status");
-    if (open) {
-      element.textContent = "回答受付中";
-      element.className = "text-xs font-bold px-3 py-2 rounded-full bg-emerald-100 text-emerald-700";
-    } else {
-      element.textContent = "回答停止中";
-      element.className = "text-xs font-bold px-3 py-2 rounded-full bg-slate-100 text-slate-500";
-    }
-  }
+  let currentSlide = 0;
 
-  // タイマー設定
-  let timerInterval = null;
-  let timerSeconds = 420;
 
-  function updateTimerDisplay() {
-    const minutes = Math.floor(timerSeconds / 60);
-    const seconds = timerSeconds % 60;
-    const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    const display = document.getElementById("timer-display-main");
-    if (display) display.textContent = formatted;
-  }
+  function renderSlide() {
 
-  function setTimer(minutes) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    timerSeconds = minutes * 60;
-    updateTimerDisplay();
-  }
+    slides.forEach((slide, index) => {
 
-  function toggleTimer() {
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    } else {
-      timerInterval = setInterval(() => {
-        if (timerSeconds > 0) {
-          timerSeconds--;
-          updateTimerDisplay();
-        } else {
-          clearInterval(timerInterval);
-          timerInterval = null;
-        }
-      }, 1000);
-    }
-  }
+      slide.classList.toggle(
+        "active",
+        index === currentSlide
+      );
 
-  function resetTimer() {
-    setTimer(7);
-  }
+    });
 
-  function randomAnswer() {
-    const names = ["1班", "2班", "3班", "4班", "5班"];
-    const random = names[Math.floor(Math.random() * names.length)];
-    document.getElementById("random-name").textContent = random;
-  }
+    document.getElementById(
+      "slide-number"
+    ).textContent =
+      `${currentSlide + 1} / ${slides.length}`;
 
-  function deleteAllAnswers() {
-    const grid = document.getElementById("live-answer-grid");
-    if (grid) grid.innerHTML = '<div class="live-empty">回答を待っています……</div>';
-  }
-</script>
-</body>
-</html>
+
+    /*
+     * 話し合い画面に来たら7分にセット
+     */
+
+    if (currentSlide === 11) {
+
+      setTimer(7);
+
+    }
+
+
+    /*
+     * 最初の問い
+     */
+
+    if (currentSlide === 2) {
+
+      openResponse(
+        "q1",
+        "リーダーってどんな人？"
+      );
+
+    }
+
+
+    /*
+     * 回答説明
+     */
+
+    if (currentSlide === 3) {
+
+      openResponse(
+        "q1",
+        "リーダーってどんな人？"
+      );
+
+    }
+
+
+    /*
+     * ランダム指名
+     */
+
+    if (currentSlide === 4) {
+
+      openResponse(
+        "q1",
+        "リーダーってどんな人？"
+      );
+
+    }
+
+
+    /*
+     * 最終回答
+     */
+
+    if (currentSlide === 20) {
+
+      openResponse(
+        "q2",
+        "あなたにとって、リーダーとは？"
+      );
+
+    }
+
+  }
+
+
+  function nextSlide() {
+
+    if (currentSlide < slides.length - 1) {
+
+      currentSlide++;
+
+      renderSlide();
+
+    }
+
+  }
+
+
+  function previousSlide() {
+
+    if (currentSlide > 0) {
+
+      currentSlide--;
+
+      renderSlide();
+
+    }
+
+  }
+
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (
+        event.key === "ArrowRight" ||
+        event.key === " "
+      ) {
+
+        nextSlide();
+
+      }
+
+      if (event.key === "ArrowLeft") {
+
+        previousSlide();
+
+      }
+
+    }
+  );
+
+
+  /*
+   * =====================================================
+   * Firebase接続状態
+   * =====================================================
+   */
+
+  db.collection("workshop")
+    .doc("state")
+    .onSnapshot(
+      () => {
+
+        const status =
+          document.getElementById(
+            "firebase-status"
+          );
+
+        status.textContent =
+          "Firebase接続中";
+
+        status.className =
+          "text-xs font-bold px-3 py-2 rounded-full bg-emerald-100 text-emerald-700";
+
+      },
+      () => {
+
+        const status =
+          document.getElementById(
+            "firebase-status"
+          );
+
+        status.textContent =
+          "Firebase接続エラー";
+
+        status.className =
+          "text-xs font-bold px-3 py-2 rounded-full bg-red-100 text-red-700";
+
+      }
+    );
+
+
+  /*
+   * =====================================================
+   * 回答受付ON
+   * =====================================================
+   */
+
+  async function openResponse(
+    questionId,
+    label
+  ) {
+
+    try {
+
+      await db
+        .collection("workshop")
+        .doc("state")
+        .set({
+
+          activeQuestionId:
+            questionId,
+
+          activeQuestionLabel:
+            label,
+
+          responseOpen:
+            true
+
+        }, {
+          merge: true
+        });
+
+
+      updateResponseStatus(true);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /*
+   * =====================================================
+   * 回答受付OFF
+   * =====================================================
+   */
+
+  async function closeResponse() {
+
+    try {
+
+      await db
+        .collection("workshop")
+        .doc("state")
+        .set({
+
+          responseOpen:
+            false
+
+        }, {
+          merge: true
+        });
+
+
+      updateResponseStatus(false);
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  function updateResponseStatus(open) {
+
+    const element =
+      document.getElementById(
+        "response-status"
+      );
+
+    if (open) {
+
+      element.textContent =
+        "回答受付中";
+
+      element.className =
+        "text-xs font-bold px-3 py-2 rounded-full bg-emerald-100 text-emerald-700";
+
+    } else {
+
+      element.textContent =
+        "回答停止中";
+
+      element.className =
+        "text-xs font-bold px-3 py-2 rounded-full bg-slate-
