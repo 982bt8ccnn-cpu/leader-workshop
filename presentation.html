@@ -2327,7 +2327,11 @@
     const turn = demoTurns[demoIndex];
     if (!turn) return;
 
-    demoAudio = new Audio(turn.audio);
+    // GitHub Pagesでは、空白・括弧を含むファイル名をURLとして安全に扱うため、
+    // 音声ファイル名をURLエンコードしてから読み込みます。
+    const audioUrl = new URL(encodeURIComponent(turn.audio), document.baseURI).href;
+    demoAudio = new Audio(audioUrl);
+    demoAudio.preload = "auto";
 
     demoAudio.addEventListener("ended", () => {
       if (!demoAutoPlaying) return;
@@ -2346,7 +2350,7 @@
       const status = document.getElementById("demo-audio-status");
       if (status) {
         status.textContent =
-          `音声ファイル「${turn.audio}」がまだありません。画面デモとして続行できます。`;
+          `音声ファイル「${turn.audio}」を再生できませんでした。GitHub上のファイル名・配置を確認してください。`;
       }
 
       if (demoAutoPlaying && demoIndex < demoTurns.length - 1) {
