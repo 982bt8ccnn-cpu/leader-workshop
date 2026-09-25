@@ -332,6 +332,70 @@
       font-weight: 700;
     }
 
+    /* =====================================================
+       話し合いデモ
+       ===================================================== */
+    .demo-stage {
+      margin-top: 28px;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+      border-radius: 26px;
+      padding: 26px 30px;
+      box-shadow: 0 8px 28px rgba(15,23,42,.07);
+    }
+    .demo-step-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .demo-step {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .demo-step.active {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    .demo-speaker {
+      color: #2563eb;
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+    .demo-dialogue {
+      color: #0f172a;
+      font-size: clamp(28px, 3.2vw, 46px);
+      font-weight: 900;
+      line-height: 1.45;
+      min-height: 145px;
+      display: flex;
+      align-items: center;
+    }
+    .demo-note {
+      color: #64748b;
+      font-size: 17px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+    .demo-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .demo-progress {
+      font-variant-numeric: tabular-nums;
+      color: #64748b;
+      font-weight: 900;
+      margin-left: auto;
+    }
+
 </style>
 </head>
 
@@ -884,10 +948,96 @@
 
 
   <!-- ==================================================
+       話し合いデモ
+       ================================================== -->
+
+  <section class="slide demo-slide">
+
+    <div class="flex flex-col justify-center h-full">
+
+      <div class="text-blue-600 font-black text-xl">
+        DEMONSTRATION
+      </div>
+
+      <div class="flex items-end justify-between gap-6 mt-3">
+        <div>
+          <h2 class="text-6xl font-black text-slate-900">
+            話し合いって、こんな感じ。
+          </h2>
+          <div class="line"></div>
+        </div>
+        <div class="text-right">
+          <div class="text-sm font-black text-slate-400">3班のお題</div>
+          <div class="text-lg font-black text-blue-800 mt-1">
+            注意する？ 関係を守る？
+          </div>
+        </div>
+      </div>
+
+      <div class="demo-stage">
+
+        <div id="demo-step-row" class="demo-step-row"></div>
+
+        <div id="demo-speaker" class="demo-speaker">
+          司会 A
+        </div>
+
+        <div id="demo-dialogue" class="demo-dialogue">
+          「じゃあ、このお題について話し合い始めます。まず、どうするのがいいと思いますか？」
+        </div>
+
+        <div id="demo-note" class="demo-note">
+          実際の話し合いを、音声と画面で再現します。
+        </div>
+
+        <div class="demo-controls">
+          <button class="control-button" onclick="demoPrevious()">
+            ← 前の発言
+          </button>
+
+          <button id="demo-play-button"
+                  class="control-button dark"
+                  onclick="demoPlay()">
+            ▶ デモを再生
+          </button>
+
+          <button class="control-button" onclick="demoPause()">
+            ❚❚ 一時停止
+          </button>
+
+          <button class="control-button" onclick="demoNext()">
+            次の発言 →
+          </button>
+
+          <button class="control-button" onclick="demoReset()">
+            最初から
+          </button>
+
+          <span id="demo-progress" class="demo-progress">
+            1 / 9
+          </span>
+        </div>
+
+        <div id="demo-audio-status" class="demo-note">
+          音声ファイルを追加すると、発言に合わせて再生できます。
+        </div>
+
+      </div>
+
+      <div class="mt-5 text-xl font-bold text-slate-500">
+        ①意見を出す → ②理由を言う → ③問題点を考える → ④大切なことを考える → ⑤発表ボードにまとめる
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ==================================================
        SLIDE 12
        ================================================== -->
 
-  <section class="slide">
+  <section class="slide discussion-slide">
 
     <div class="flex flex-col justify-center h-full">
 
@@ -1081,7 +1231,7 @@
        SLIDE 20
        ================================================== -->
 
-  <section class="slide">
+  <section class="slide final-question-slide">
 
     <div class="flex flex-col justify-center h-full">
 
@@ -1426,9 +1576,10 @@
 
     /*
      * 話し合い画面に来たら7分にセット
+     * ※スライド番号を直接指定せず、クラス名で判定
      */
 
-    if (currentSlide === 11) {
+    if (slides[currentSlide]?.classList.contains("discussion-slide")) {
 
       setTimer(7);
 
@@ -1479,9 +1630,10 @@
 
     /*
      * 最終回答
+     * ※デモ追加などでスライド番号が変わっても壊れないように判定
      */
 
-    if (currentSlide === 19) {
+    if (slides[currentSlide]?.classList.contains("final-question-slide")) {
 
       openResponse(
         "q2",
@@ -1495,6 +1647,11 @@
 
   function nextSlide() {
 
+    if (demoIsCurrentSlide()) {
+      demoStopAudio();
+      demoAutoPlaying = false;
+    }
+
     if (currentSlide < slides.length - 1) {
 
       currentSlide++;
@@ -1507,6 +1664,11 @@
 
 
   function previousSlide() {
+
+    if (demoIsCurrentSlide()) {
+      demoStopAudio();
+      demoAutoPlaying = false;
+    }
 
     if (currentSlide > 0) {
 
@@ -2011,6 +2173,241 @@
 
   }
 
+
+
+  /*
+   * =====================================================
+   * 話し合いデモ
+   *
+   * GitHub Pagesに以下のMP3を同じ階層で追加してください。
+   * speech.mp3
+   * speech (1).mp3
+   * speech (2).mp3
+   * speech (3).mp3
+   * speech (4).mp3
+   * speech (5).mp3
+   * speech (6).mp3
+   * speech (7).mp3
+   * speech (8).mp3
+   *
+   * MP3がまだなくても画面デモは動きます。
+   * =====================================================
+   */
+
+  const demoTurns = [
+    {
+      step: 1,
+      stepLabel: "① 意見を出す",
+      speaker: "司会 A",
+      text: "「じゃあ、このお題について話し合い始めます。まず、どうするのがいいと思いますか？」",
+      audio: "speech.mp3",
+      note: "まずは、自分の考えを出します。"
+    },
+    {
+      step: 1,
+      stepLabel: "① 意見を出す",
+      speaker: "C",
+      text: "「私は、注意した方がいいと思います。」",
+      audio: "speech (1).mp3",
+      note: "一人が自分の意見を出しました。"
+    },
+    {
+      step: 2,
+      stepLabel: "② 理由を言う",
+      speaker: "司会 A",
+      text: "「うん。なんでそう思った？」",
+      audio: "speech (2).mp3",
+      note: "意見だけで終わらず、理由を聞きます。"
+    },
+    {
+      step: 2,
+      stepLabel: "② 理由を言う",
+      speaker: "C",
+      text: "「注意しないままだと、その人が自分のしていることに気づかないかもしれないと思ったからです。」",
+      audio: "speech (3).mp3",
+      note: "「なぜそうするのか」を言葉にします。"
+    },
+    {
+      step: 3,
+      stepLabel: "③ 問題点を考える",
+      speaker: "D",
+      text: "「でも、注意したら、その人が嫌な気持ちになって、関係が悪くなるかもしれないと思います。」",
+      audio: "speech (4).mp3",
+      note: "実際に行ったときに起きそうな問題を考えます。"
+    },
+    {
+      step: 4,
+      stepLabel: "④ 大切なことを考える",
+      speaker: "司会 A",
+      text: "「なるほど。じゃあ、その問題があるとしたら、実際に注意するときに何が大切だと思う？」",
+      audio: "speech (5).mp3",
+      note: "問題点を踏まえて、どうすればよいか考えます。"
+    },
+    {
+      step: 4,
+      stepLabel: "④ 大切なことを考える",
+      speaker: "E",
+      text: "「その人を責めるように言うんじゃなくて、どうしたらいいか一緒に考えることが大切だと思います。」",
+      audio: "speech (6).mp3",
+      note: "別の人の意見を聞き、考えを深めます。"
+    },
+    {
+      step: 4,
+      stepLabel: "④ 大切なことを考える",
+      speaker: "F",
+      text: "「じゃあ、注意するかしないかだけじゃなくて、どう伝えるかも大事ってことじゃない？」",
+      audio: "speech (7).mp3",
+      note: "出た意見をつなげて、より具体的に考えます。"
+    },
+    {
+      step: 5,
+      stepLabel: "⑤ 発表ボードにまとめる",
+      speaker: "書記 B",
+      text: "「じゃあ、最初の意見、理由、問題点、それから大切なことをまとめて、Microsoft Whiteboardの発表ボードに書こう。」",
+      audio: "speech (8).mp3",
+      note: "最後に、発表ボードに班の考えを整理します。"
+    }
+  ];
+
+  let demoIndex = 0;
+  let demoAudio = null;
+  let demoAutoPlaying = false;
+
+  function demoIsCurrentSlide() {
+    return slides[currentSlide]?.classList.contains("demo-slide");
+  }
+
+  function demoRender() {
+    const turn = demoTurns[demoIndex];
+    const stepRow = document.getElementById("demo-step-row");
+    const speaker = document.getElementById("demo-speaker");
+    const dialogue = document.getElementById("demo-dialogue");
+    const note = document.getElementById("demo-note");
+    const progress = document.getElementById("demo-progress");
+    const status = document.getElementById("demo-audio-status");
+
+    if (!turn || !stepRow || !speaker || !dialogue || !note || !progress) return;
+
+    const labels = [
+      "① 意見を出す",
+      "② 理由を言う",
+      "③ 問題点を考える",
+      "④ 大切なことを考える",
+      "⑤ 発表ボード"
+    ];
+
+    stepRow.innerHTML = labels.map((label, i) => `
+      <span class="demo-step ${i + 1 === turn.step ? "active" : ""}">
+        ${label}
+      </span>
+    `).join("");
+
+    speaker.textContent = turn.speaker;
+    dialogue.textContent = turn.text;
+    note.textContent = turn.note;
+    progress.textContent = `${demoIndex + 1} / ${demoTurns.length}`;
+
+    if (status) {
+      status.textContent =
+        `音声：${turn.audio}（GitHub Pagesに追加すると再生されます）`;
+    }
+  }
+
+  function demoStopAudio() {
+    if (demoAudio) {
+      demoAudio.pause();
+      demoAudio.currentTime = 0;
+      demoAudio = null;
+    }
+  }
+
+  function demoPlayCurrent() {
+    demoStopAudio();
+
+    const turn = demoTurns[demoIndex];
+    if (!turn) return;
+
+    demoAudio = new Audio(turn.audio);
+
+    demoAudio.addEventListener("ended", () => {
+      if (!demoAutoPlaying) return;
+
+      if (demoIndex < demoTurns.length - 1) {
+        demoIndex++;
+        demoRender();
+        demoPlayCurrent();
+      } else {
+        demoAutoPlaying = false;
+        demoRender();
+      }
+    });
+
+    demoAudio.addEventListener("error", () => {
+      const status = document.getElementById("demo-audio-status");
+      if (status) {
+        status.textContent =
+          `音声ファイル「${turn.audio}」がまだありません。画面デモとして続行できます。`;
+      }
+
+      if (demoAutoPlaying && demoIndex < demoTurns.length - 1) {
+        setTimeout(() => {
+          if (!demoAutoPlaying) return;
+          demoIndex++;
+          demoRender();
+          demoPlayCurrent();
+        }, 1200);
+      }
+    });
+
+    demoAudio.play().catch(() => {
+      const status = document.getElementById("demo-audio-status");
+      if (status) {
+        status.textContent =
+          `音声再生を開始できませんでした。「▶ デモを再生」をもう一度押してください。`;
+      }
+    });
+  }
+
+  function demoPlay() {
+    demoAutoPlaying = true;
+    demoPlayCurrent();
+  }
+
+  function demoPause() {
+    demoAutoPlaying = false;
+    if (demoAudio) {
+      demoAudio.pause();
+    }
+  }
+
+  function demoNext() {
+    demoAutoPlaying = false;
+    demoStopAudio();
+
+    if (demoIndex < demoTurns.length - 1) {
+      demoIndex++;
+      demoRender();
+    }
+  }
+
+  function demoPrevious() {
+    demoAutoPlaying = false;
+    demoStopAudio();
+
+    if (demoIndex > 0) {
+      demoIndex--;
+      demoRender();
+    }
+  }
+
+  function demoReset() {
+    demoAutoPlaying = false;
+    demoStopAudio();
+    demoIndex = 0;
+    demoRender();
+  }
+
+  demoRender();
 
   /*
    * =====================================================
