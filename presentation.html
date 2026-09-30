@@ -132,6 +132,7 @@
     .live-answer-card { position:relative; background:white; border:1px solid #dbeafe; border-radius:18px; padding:18px; box-shadow:0 5px 18px rgba(15,23,42,.07); min-height:145px; }
     .live-answer-author { color:#2563eb; font-size:15px; font-weight:900; padding-right:78px; margin-bottom:8px; }
     .live-answer-text { color:#1e293b; font-size:clamp(19px,1.8vw,27px); font-weight:800; line-height:1.45; word-break:normal; overflow-wrap:anywhere; }
+    .live-answer-reason { color:#475569; font-size:clamp(16px,1.35vw,21px); line-height:1.5; margin-top:12px; white-space:pre-wrap; overflow-wrap:anywhere; }
     .hide-answer-button { position:absolute; top:12px; right:12px; border:1px solid #cbd5e1; background:#f8fafc; color:#64748b; border-radius:9px; padding:5px 8px; font-size:12px; font-weight:900; cursor:pointer; }
     .hide-answer-button:hover { background:#e2e8f0; color:#334155; }
     .live-empty { grid-column:1 / -1; display:flex; align-items:center; justify-content:center; min-height:220px; border:2px dashed #cbd5e1; border-radius:20px; color:#94a3b8; font-size:24px; font-weight:800; background:rgba(255,255,255,.7); }
@@ -196,21 +197,9 @@
       border-color: #1d4ed8;
     }
 
-    .random-box {
-      background: #eff6ff;
-      border: 2px solid #93c5fd;
-      border-radius: 24px;
-      padding: 35px;
-      margin-top: 35px;
-      text-align: center;
-    }
 
-    .random-name {
-      font-size: clamp(40px, 6vw, 85px);
-      font-weight: 900;
-      color: #1e40af;
-      margin-top: 15px;
-    }
+
+
 
     .timer-large {
       font-size: clamp(90px, 18vw, 250px);
@@ -221,32 +210,13 @@
       margin-top: 7vh;
     }
 
-    .comparison {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      margin-top: 45px;
-    }
 
-    .comparison-box {
-      background: #f8fafc;
-      border-radius: 25px;
-      padding: 30px;
-      border: 1px solid #e2e8f0;
-    }
 
-    .comparison-title {
-      font-size: 20px;
-      font-weight: 900;
-      color: #2563eb;
-      margin-bottom: 15px;
-    }
 
-    .comparison-answer {
-      font-size: 28px;
-      font-weight: 800;
-      line-height: 1.5;
-    }
+
+
+
+
 
     .summary-grid {
       display: grid;
@@ -274,63 +244,18 @@
       display: none !important;
     }
 
-  
-    .final-answer-live {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
 
-    .final-answer-live-grid {
-      flex: 1;
-      overflow-y: auto;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-      padding-right: 8px;
-    }
 
-    .final-answer-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.05);
-    }
 
-    .final-answer-author {
-      display: inline-block;
-      color: #1d4ed8;
-      background: #eff6ff;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 14px;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
 
-    .final-answer-text {
-      color: #1e293b;
-      font-size: 20px;
-      line-height: 1.6;
-      font-weight: 700;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
 
-    .final-answer-empty {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 220px;
-      color: #94a3b8;
-      border: 2px dashed #e2e8f0;
-      border-radius: 16px;
-      font-size: 20px;
-      font-weight: 700;
-    }
+
+
+
+
+
+
+
 
     /* =====================================================
        話し合いデモ
@@ -604,7 +529,7 @@
           </p>
 
           <p class="text-3xl font-black text-blue-900 mt-5">
-            ② 自分の考えを入力
+            ② 自分の考えと理由を入力
           </p>
 
           <p class="text-3xl font-black text-blue-900 mt-5">
@@ -655,104 +580,14 @@
        SLIDE 6
        ================================================== -->
 
-  <section class="slide">
 
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        THINK
-      </div>
-
-      <h2 class="text-6xl font-black text-slate-900 mt-4">
-        なぜ、そう思った？
-      </h2>
-
-      <div class="line"></div>
-
-      <p class="text-3xl text-slate-600 font-bold mt-8">
-        2〜3人に、理由を聞きます。
-      </p>
-
-      <div class="random-box">
-
-        <div class="text-xl font-bold text-blue-600">
-          ランダム指名
-        </div>
-
-        <div
-          id="random-name"
-          class="random-name">
-          ？
-        </div>
-
-        <button
-          onclick="randomAnswer()"
-          class="mt-5 bg-blue-700 text-white
-                 font-black text-xl px-8 py-4
-                 rounded-xl">
-          ランダムで選ぶ
-        </button>
-
-      </div>
-
-    </div>
-
-  </section>
 
 
   <!-- ==================================================
        SLIDE 6
        ================================================== -->
 
-  <section class="slide">
 
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        TODAY'S FLOW
-      </div>
-
-      <h2 class="text-6xl font-black text-slate-900 mt-4">
-        最初と最後で、どう変わる？
-      </h2>
-
-      <div class="line"></div>
-
-      <div class="comparison">
-
-        <div class="comparison-box">
-
-          <div class="comparison-title">
-            最初
-          </div>
-
-          <div class="text-3xl font-black">
-            リーダーって何？
-          </div>
-
-        </div>
-
-        <div class="comparison-box">
-
-          <div class="comparison-title">
-            最後
-          </div>
-
-          <div class="text-3xl font-black">
-            リーダーとは？
-          </div>
-
-        </div>
-
-      </div>
-
-      <p class="text-2xl text-slate-500 mt-8">
-        今日の活動を通して、自分の考えがどう変わったか見てみよう。
-      </p>
-
-    </div>
-
-  </section>
 
 
   <!-- ==================================================
@@ -1231,154 +1066,28 @@
        SLIDE 20
        ================================================== -->
 
-  <section class="slide final-question-slide">
 
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        QUESTION 02
-      </div>
-
-      <h2 class="text-[clamp(50px,7vw,110px)]
-                 font-black text-slate-900 mt-4">
-        リーダーって、何？
-      </h2>
-
-      <div class="line"></div>
-
-      <p class="text-3xl font-bold text-slate-500 mt-8">
-        最初に考えた答えと、今の答えを比べてみよう。
-      </p>
-
-    </div>
-
-  </section>
 
 
   <!-- ==================================================
        SLIDE 21
        ================================================== -->
 
-  <section class="slide">
 
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        FINAL ANSWER
-      </div>
-
-      <h2 class="text-6xl font-black text-slate-900 mt-4">
-        最後の答えを送ろう
-      </h2>
-
-      <div class="line"></div>
-
-      <div class="mt-12 text-4xl font-black text-blue-800">
-        「あなたにとって、リーダーとは？」
-      </div>
-
-      <p class="text-2xl text-slate-500 font-bold mt-6">
-        自分の言葉で書いてください。
-      </p>
-
-    </div>
-
-  </section>
 
 
   <!-- ==================================================
        SLIDE 22
        ================================================== -->
 
-  <section class="slide">
 
-    <div class="final-answer-live">
-
-      <div class="flex items-end justify-between mb-5">
-        <div>
-          <div class="text-blue-600 font-black text-xl">
-            FINAL ANSWERS
-          </div>
-          <h2 class="text-5xl font-black text-slate-900 mt-2">
-            みんなの「リーダーとは？」
-          </h2>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div id="final-answer-live-count" class="text-lg font-bold text-slate-500">0件</div>
-          <button class="control-button dark" onclick="deleteAllAnswers('q2')">最後の回答をすべて削除</button>
-        </div>
-      </div>
-
-      <div id="final-answer-grid" class="final-answer-live-grid">
-        <div class="final-answer-empty">
-          回答を待っています……
-        </div>
-      </div>
-
-    </div>
-
-  </section>
 
 
   <!-- ==================================================
        SLIDE 23
        ================================================== -->
 
-  <section class="slide">
 
-    <div class="flex flex-col justify-center h-full">
-
-      <div class="text-blue-600 font-black text-xl">
-        COMPARISON
-      </div>
-
-      <h2 class="text-6xl font-black text-slate-900 mt-4">
-        最初と最後を比べてみよう
-      </h2>
-
-      <div class="comparison">
-
-        <div class="comparison-box">
-
-          <div class="comparison-title">
-            最初の答え
-          </div>
-
-          <div id="initial-count"
-               class="text-5xl font-black text-slate-800">
-            0
-          </div>
-
-          <div class="text-xl text-slate-500 mt-2">
-            件の回答
-          </div>
-
-        </div>
-
-
-        <div class="comparison-box">
-
-          <div class="comparison-title">
-            最後の答え
-          </div>
-
-          <div id="final-count"
-               class="text-5xl font-black text-slate-800">
-            0
-          </div>
-
-          <div class="text-xl text-slate-500 mt-2">
-            件の回答
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
 
 
   <!-- ==================================================
@@ -1614,33 +1323,14 @@
     }
 
 
-    /*
-     * ランダム指名
-     */
-
+    // 回答表示に進んだら、最初の質問の受付を止める。
     if (currentSlide === 4) {
-
-      openResponse(
-        "q1",
-        "リーダーってどんな人？"
-      );
-
+      closeResponse();
     }
 
 
-    /*
-     * 最終回答
-     * ※デモ追加などでスライド番号が変わっても壊れないように判定
-     */
 
-    if (slides[currentSlide]?.classList.contains("final-question-slide")) {
 
-      openResponse(
-        "q2",
-        "あなたにとって、リーダーとは？"
-      );
-
-    }
 
   }
 
@@ -1871,9 +1561,7 @@
 
       });
 
-      updateCounts();
       updateLiveAnswers();
-      updateFinalLiveAnswers();
 
     });
 
@@ -1934,37 +1622,12 @@
       <div class="live-answer-card">
         <button class="hide-answer-button" onclick="deleteAnswer('${escapeHtml(a.id)}')">× 削除</button>
         <div class="live-answer-author">${escapeHtml(a.author || "匿名")}</div>
-        <div class="live-answer-text">${escapeHtml(a.text || "")}</div>
+        <div class="live-answer-text"><strong>考え：</strong>${escapeHtml(a.text || "")}</div>
+        <div class="live-answer-reason"><strong>理由：</strong>${escapeHtml(a.reason || "（理由の記録なし）")}</div>
       </div>
     `).join("");
   }
 
-
-  function updateFinalLiveAnswers() {
-    const grid = document.getElementById("final-answer-grid");
-    const count = document.getElementById("final-answer-live-count");
-    if (!grid || !count) return;
-
-    const finalAnswers = answers
-      .filter(a => a.questionId === "q2")
-      .slice()
-      .sort((a, b) => (a.timestamp?.seconds ?? 0) - (b.timestamp?.seconds ?? 0));
-
-    count.textContent = `${finalAnswers.length}件`;
-
-    if (!finalAnswers.length) {
-      grid.innerHTML = `<div class="final-answer-empty">回答を待っています……</div>`;
-      return;
-    }
-
-    grid.innerHTML = finalAnswers.map(a => `
-      <div class="final-answer-card" style="position:relative;">
-        <button class="hide-answer-button" onclick="deleteAnswer('${escapeHtml(a.id)}')">× 削除</button>
-        <div class="final-answer-author">${escapeHtml(a.author || "匿名")}</div>
-        <div class="final-answer-text">${escapeHtml(a.text || "")}</div>
-      </div>
-    `).join("");
-  }
 
 
   /*
@@ -1973,91 +1636,8 @@
    * =====================================================
    */
 
-  function updateCounts() {
-
-    const initial =
-      answers.filter(
-        answer =>
-          answer.questionId === "q1"
-      ).length;
-
-    const final =
-      answers.filter(
-        answer =>
-          answer.questionId === "q2"
-      ).length;
 
 
-    document.getElementById(
-      "initial-count"
-    ).textContent =
-      initial;
-
-
-    document.getElementById(
-      "final-count"
-    ).textContent =
-      final;
-
-  }
-
-
-  /*
-   * =====================================================
-   * ランダム指名
-   * =====================================================
-   */
-
-  function randomAnswer() {
-
-    const initialAnswers =
-      answers.filter(
-        answer =>
-          answer.questionId === "q1"
-      );
-
-
-    if (initialAnswers.length === 0) {
-
-      document.getElementById(
-        "random-name"
-      ).textContent =
-        "まだ回答がありません";
-
-      return;
-
-    }
-
-
-    let count = 0;
-
-    const animation =
-      setInterval(() => {
-
-        const random =
-          initialAnswers[
-            Math.floor(
-              Math.random() *
-              initialAnswers.length
-            )
-          ];
-
-        document.getElementById(
-          "random-name"
-        ).textContent =
-          random.author;
-
-        count++;
-
-        if (count >= 15) {
-
-          clearInterval(animation);
-
-        }
-
-      }, 80);
-
-  }
 
 
   /*

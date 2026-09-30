@@ -130,6 +130,14 @@
             </div>
           </div>
 
+          <!-- 理由 -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-2" for="reason-text">そう考えた理由</label>
+            <textarea id="reason-text" rows="4" maxlength="500" placeholder="なぜそう考えたのか入力してください" required
+              class="w-full border border-slate-300 rounded-xl px-4 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+            <div class="text-right text-xs text-slate-400 mt-1"><span id="reason-char-count">0</span> / 500</div>
+          </div>
+
           <!-- 送信 -->
           <button
             type="submit"
@@ -209,6 +217,8 @@
   const form = document.getElementById("answer-form");
   const authorInput = document.getElementById("author");
   const answerInput = document.getElementById("answer-text");
+  const reasonInput = document.getElementById("reason-text");
+  const reasonCharCount = document.getElementById("reason-char-count");
   const submitBtn = document.getElementById("submit-btn");
 
   const questionLabel =
@@ -245,10 +255,11 @@
    */
 
   answerInput.addEventListener("input", () => {
+    charCount.textContent = answerInput.value.length;
+  });
 
-    charCount.textContent =
-      answerInput.value.length;
-
+  reasonInput.addEventListener("input", () => {
+    reasonCharCount.textContent = reasonInput.value.length;
   });
 
 
@@ -287,15 +298,17 @@
 
       const data = doc.data();
 
+      // This workshop only accepts the initial q1 response.
       currentQuestionId =
-        data.activeQuestionId || null;
+        data.activeQuestionId === "q1" ? "q1" : null;
 
       currentQuestionLabel =
-        data.activeQuestionLabel ||
-        "スクリーンの指示を待っています";
+        currentQuestionId
+          ? (data.activeQuestionLabel || "リーダーってどんな人？")
+          : "スクリーンの指示を待っています";
 
       responseOpen =
-        data.responseOpen === true;
+        currentQuestionId === "q1" && data.responseOpen === true;
 
       updateQuestion();
 
@@ -323,7 +336,7 @@
     questionLabel.textContent =
       currentQuestionLabel;
 
-    if (responseOpen && currentQuestionId) {
+    if (responseOpen && currentQuestionId === "q1") {
 
       form.classList.remove("hidden");
       closedMessage.classList.add("hidden");
@@ -350,7 +363,7 @@
 
     event.preventDefault();
 
-    if (!responseOpen || !currentQuestionId) {
+    if (!responseOpen || currentQuestionId !== "q1") {
 
       alert("現在は回答を受け付けていません。");
 
@@ -363,10 +376,12 @@
 
     const text =
       answerInput.value.trim();
+    const reason =
+      reasonInput.value.trim();
 
-    if (!author || !text) {
+    if (!author || !text || !reason) {
 
-      alert("班名・名前と回答を入力してください。");
+      alert("班名・名前、考え、理由を入力してください。");
 
       return;
 
@@ -387,14 +402,17 @@
 
         text: text,
 
+        reason: reason,
+
         timestamp:
           firebase.firestore.FieldValue.serverTimestamp()
 
       });
 
       answerInput.value = "";
-
+      reasonInput.value = "";
       charCount.textContent = "0";
+      reasonCharCount.textContent = "0";
 
       successMessage.classList.remove("hidden");
 
