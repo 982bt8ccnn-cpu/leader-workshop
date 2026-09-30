@@ -1857,63 +1857,20 @@
 
   let answers = [];
 
-  let answers = [];
+  db.collection("answers")
+    .onSnapshot((snapshot) => {
 
-let unsubscribeAnswers = null;
+      answers = [];
 
-function startRealtimeListener() {
+      snapshot.forEach((doc) => {
 
-  if (unsubscribeAnswers) {
-    unsubscribeAnswers();
-  }
+        answers.push({
+          id: doc.id,
+          ...doc.data()
+        });
 
-  unsubscribeAnswers =
-    db.collection("answers")
-      .onSnapshot(
+      });
 
-        (snapshot) => {
-
-          answers = [];
-
-          snapshot.forEach((doc) => {
-
-            answers.push({
-              id: doc.id,
-              ...doc.data()
-            });
-
-          });
-
-          updateCounts();
-          updateLiveAnswers();
-          updateFinalLiveAnswers();
-
-        },
-
-        (error) => {
-
-          console.error(
-            "Firestore監視エラー",
-            error
-          );
-
-          document
-            .getElementById("firebase-status")
-            .textContent =
-            "再接続中";
-
-          setTimeout(
-            startRealtimeListener,
-            3000
-          );
-
-        }
-
-      );
-
-}
-
-startRealtimeListener();
       updateCounts();
       updateLiveAnswers();
       updateFinalLiveAnswers();
