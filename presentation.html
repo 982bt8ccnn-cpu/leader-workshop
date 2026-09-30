@@ -1857,20 +1857,63 @@
 
   let answers = [];
 
-  db.collection("answers")
-    .onSnapshot((snapshot) => {
+  let answers = [];
 
-      answers = [];
+let unsubscribeAnswers = null;
 
-      snapshot.forEach((doc) => {
+function startRealtimeListener() {
 
-        answers.push({
-          id: doc.id,
-          ...doc.data()
-        });
+  if (unsubscribeAnswers) {
+    unsubscribeAnswers();
+  }
 
-      });
+  unsubscribeAnswers =
+    db.collection("answers")
+      .onSnapshot(
 
+        (snapshot) => {
+
+          answers = [];
+
+          snapshot.forEach((doc) => {
+
+            answers.push({
+              id: doc.id,
+              ...doc.data()
+            });
+
+          });
+
+          updateCounts();
+          updateLiveAnswers();
+          updateFinalLiveAnswers();
+
+        },
+
+        (error) => {
+
+          console.error(
+            "Firestore監視エラー",
+            error
+          );
+
+          document
+            .getElementById("firebase-status")
+            .textContent =
+            "再接続中";
+
+          setTimeout(
+            startRealtimeListener,
+            3000
+          );
+
+        }
+
+      );
+
+}
+
+startRealtimeListener();
       updateCounts();
       updateLiveAnswers();
       updateFinalLiveAnswers();
