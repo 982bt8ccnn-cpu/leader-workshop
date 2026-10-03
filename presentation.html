@@ -520,6 +520,12 @@
         <div
           id="qr-code"
           class="bg-white p-4 rounded-2xl border border-slate-200">
+          <img
+            src="answer-qr.png"
+            alt="生徒回答フォームを開くQRコード"
+            width="190"
+            height="190"
+            decoding="async">
         </div>
 
         <div>
@@ -1999,33 +2005,7 @@
    * =====================================================
    */
 
-  const qrScript =
-    document.createElement(
-      "script"
-    );
 
-  qrScript.src =
-    "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
-
-  qrScript.onload =
-    function () {
-
-      new QRCode(
-        document.getElementById(
-          "qr-code"
-        ),
-        {
-          text: STUDENT_URL,
-          width: 190,
-          height: 190
-        }
-      );
-
-    };
-
-  document.head.appendChild(
-    qrScript
-  );
 
 
   /*
