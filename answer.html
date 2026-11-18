@@ -8,7 +8,7 @@
 <div class="notice"><b>保護の範囲</b><br>ページ本文を暗号化し、正しいパスワードで復号したときだけ表示します。利用者ごとのアカウント、サーバー認証、アクセス記録、試行回数制限はありません。</div>
 <section class="card"><label class="field">保護するHTMLファイル<input id="htmlFile" type="file" accept=".html,.htm,text/html"></label>
 <p class="hint">「kaigi-transfer.html」を選びます。外部スクリプトを含むHTMLは拒否します。外部フォントや画像などの通信がないかも確認してください。</p>
-<label class="field">共有パスワード（20文字以上）<input id="pass1" type="password" autocomplete="new-password" placeholder="長く、推測されにくいもの"></label>
+<label class="field">共有パスワード（文字数などの制限はありませんが、第三者に特定されにくいパスワードをしようしてください。）<input id="pass1" type="password" autocomplete="new-password" placeholder="長く、推測されにくいもの"></label>
 <label class="field">共有パスワードを再入力<input id="pass2" type="password" autocomplete="new-password"></label>
 <label class="field">公開ファイル名<input id="outName" type="text" value="kaigi-transfer-protected.html" maxlength="100"></label>
 <div class="actions"><button id="make" class="btn">暗号化したページを作成</button></div><div id="status" class="status" role="status" aria-live="polite"></div></section>
